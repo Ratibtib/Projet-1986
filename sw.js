@@ -1,11 +1,13 @@
-const CACHE_NAME = 'projet1986-v4';
+const CACHE_NAME = 'projet1986-v5';
 const ASSETS = [
   './',
   './index.html',
   './Fouras.m4a',
   './manifest.json',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js'
 ];
 
 // Install — cache all assets
