@@ -1363,7 +1363,13 @@ document.addEventListener('DOMContentLoaded', () => {
   runBoot();
   // Register Service Worker for PWA
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(r => console.log('SW registered')).catch(e => console.log('SW error', e));
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(reg => {
+        console.log('SW registered, scope:', reg.scope);
+        // Force update check
+        reg.update();
+      })
+      .catch(e => console.log('SW error', e));
   }
 });
 </script>

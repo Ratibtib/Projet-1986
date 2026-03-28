@@ -1,13 +1,11 @@
-const CACHE_NAME = 'projet1986-v2';
-const BASE = '/Projet-1986';
+const CACHE_NAME = 'projet1986-v3';
 const ASSETS = [
-  BASE + '/',
-  BASE + '/index.html',
-  BASE + '/Fouras.m4a',
-  BASE + '/manifest.json',
-  BASE + '/icons/icon-192.png',
-  BASE + '/icons/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap'
+  './',
+  './index.html',
+  './Fouras.m4a',
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
 // Install — cache all assets
@@ -15,39 +13,56 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       return Promise.allSettled(
-        ASSETS.map(url => cache.add(url).catch(err => console.log('Skip cache:', url, err)))
+        ASSETS.map(url =>
+          cache.add(url).catch(err => console.warn('Cache skip:', url, err))
+        )
       );
     })
   );
+  // Force activate immediately (replace old SW)
   self.skipWaiting();
 });
 
-// Activate — clean old caches
+// Activate — delete ALL old caches
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+      Promise.all(
+        keys.filter(k => k !== CACHE_NAME).map(k => {
+          console.log('Deleting old cache:', k);
+          return caches.delete(k);
+        })
+      )
     )
   );
+  // Take control of all pages immediately
   self.clients.claim();
 });
 
-// Fetch — cache first, then network
+// Fetch — network first, fallback to cache
 self.addEventListener('fetch', event => {
+  // Only handle GET requests
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        if (response.ok && event.request.method === 'GET') {
+    fetch(event.request)
+      .then(response => {
+        // Cache successful responses
+        if (response.ok) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match(BASE + '/index.html');
-        }
-      });
-    })
+      })
+      .catch(() => {
+        // Offline — serve from cache
+        return caches.match(event.request).then(cached => {
+          if (cached) return cached;
+          // Fallback for navigation requests
+          if (event.request.mode === 'navigate') {
+            return caches.match('./index.html');
+          }
+        });
+      })
   );
 });
