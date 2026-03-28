@@ -1,11 +1,12 @@
-const CACHE_NAME = 'projet1986-v1';
+const CACHE_NAME = 'projet1986-v2';
+const BASE = '/Projet-1986';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/Fouras.m4a',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
+  BASE + '/',
+  BASE + '/index.html',
+  BASE + '/Fouras.m4a',
+  BASE + '/manifest.json',
+  BASE + '/icons/icon-192.png',
+  BASE + '/icons/icon-512.png',
   'https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap'
 ];
 
@@ -13,13 +14,9 @@ const ASSETS = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS).catch(err => {
-        console.log('Cache addAll error (non-critical):', err);
-        // Cache what we can individually
-        return Promise.allSettled(
-          ASSETS.map(url => cache.add(url).catch(() => console.log('Skip:', url)))
-        );
-      });
+      return Promise.allSettled(
+        ASSETS.map(url => cache.add(url).catch(err => console.log('Skip cache:', url, err)))
+      );
     })
   );
   self.skipWaiting();
@@ -41,16 +38,14 @@ self.addEventListener('fetch', event => {
     caches.match(event.request).then(cached => {
       if (cached) return cached;
       return fetch(event.request).then(response => {
-        // Cache new successful requests
         if (response.ok && event.request.method === 'GET') {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return response;
       }).catch(() => {
-        // Offline fallback for navigation
         if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
+          return caches.match(BASE + '/index.html');
         }
       });
     })
