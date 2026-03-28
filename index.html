@@ -126,9 +126,8 @@ html, body {
 #boot-log .line { opacity: 0; animation: fadeIn .3s forwards; }
 #boot-log .line.ok::after { content: ' [OK]'; color: var(--success); }
 #boot-log .line.warn::after { content: ' [!]'; color: var(--warn); }
-#boot-enter {
-  margin-top: 30px; display: none;
-  animation: fadeInUp .6s ease;
+#boot-buttons {
+  margin-top: 30px;
 }
 
 /* ═══════════ INTRO SCREEN ═══════════ */
@@ -531,7 +530,18 @@ html, body {
   <div class="logo">PROJET 1986</div>
   <div class="subtitle">Système de réactivation</div>
   <div id="boot-log"></div>
-  <button class="btn-primary" id="boot-enter" onclick="showScreen('intro-screen')">ENTRER</button>
+  <div id="boot-buttons" style="display:none; text-align:center; animation: fadeInUp .6s ease;">
+    <button class="btn-primary" id="btn-install" onclick="installPWA()" style="display:none;">
+      📲 INSTALLER L'APP
+    </button>
+    <div id="install-hint" style="display:none; font-family:var(--font-mono); font-size:.55rem; color:var(--text-dim); margin-top:10px; line-height:1.6; max-width:280px; margin-left:auto; margin-right:auto;"></div>
+    <button class="btn-ghost" id="btn-skip" onclick="skipInstall()" style="display:none; margin-top:14px;">
+      CONTINUER SANS INSTALLER ›
+    </button>
+    <button class="btn-primary" id="btn-enter-direct" onclick="showScreen('intro-screen')" style="display:none;">
+      ENTRER
+    </button>
+  </div>
 </div>
 
 <!-- INTRO -->
@@ -852,10 +862,10 @@ function runBoot() {
       log.scrollTop = log.scrollHeight;
     }, total);
   });
-  // Show ENTER button after boot
+  // Show buttons after boot
   setTimeout(() => {
-    const btn = document.getElementById('boot-enter');
-    btn.style.display = 'inline-block';
+    document.getElementById('boot-buttons').style.display = 'block';
+    showInstallButton();
   }, total + 800);
 }
 
@@ -1355,6 +1365,81 @@ function resetGame() {
   STATE = { currentEnigma: 0, solved: [], hintUsed: [], started: false };
   saveState();
   location.reload();
+}
+
+// ═══════════════════════ PWA INSTALL ═══════════════════════
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  console.log('Install prompt captured');
+  // Update button if boot is already done
+  showInstallButton();
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('PWA installed');
+  deferredPrompt = null;
+  // Auto-continue after install
+  setTimeout(() => showScreen('intro-screen'), 500);
+});
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+}
+
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+function showInstallButton() {
+  const btnInstall = document.getElementById('btn-install');
+  const btnSkip = document.getElementById('btn-skip');
+  const btnEnter = document.getElementById('btn-enter-direct');
+  const hint = document.getElementById('install-hint');
+
+  if (isStandalone()) {
+    // Already running as PWA
+    btnEnter.style.display = 'inline-block';
+  } else if (deferredPrompt) {
+    // Chrome/Android — install prompt available
+    btnInstall.style.display = 'inline-block';
+    btnSkip.style.display = 'inline-block';
+  } else if (isIOS()) {
+    // iOS — manual instructions
+    btnInstall.style.display = 'none';
+    hint.style.display = 'block';
+    hint.innerHTML = '📱 Pour installer sur iPhone :<br>Appuyez sur <strong style="color:var(--accent)">Partager ⬆</strong> puis<br><strong style="color:var(--accent)">Sur l\'écran d\'accueil</strong>';
+    btnSkip.style.display = 'inline-block';
+    btnSkip.textContent = 'CONTINUER ›';
+  } else {
+    // Other browser — just enter
+    btnEnter.style.display = 'inline-block';
+  }
+}
+
+function installPWA() {
+  if (!deferredPrompt) {
+    showScreen('intro-screen');
+    return;
+  }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then((result) => {
+    console.log('Install choice:', result.outcome);
+    deferredPrompt = null;
+    if (result.outcome === 'accepted') {
+      // Will trigger appinstalled event
+    } else {
+      // User declined — continue anyway
+      showScreen('intro-screen');
+    }
+  });
+}
+
+function skipInstall() {
+  showScreen('intro-screen');
 }
 
 // ═══════════════════════ INIT ═══════════════════════
