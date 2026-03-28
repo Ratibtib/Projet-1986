@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0f">
+<title>PROJET 1986 : RÉACTIVATION</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg-deep: #0a0a0f;
+  --bg-panel: #12121a;
+  --bg-card: #1a1a28;
+  --accent: #00f0ff;
+  --accent-dim: #00f0ff33;
+  --accent-glow: #00f0ff88;
+  --warn: #ff3366;
+  --warn-dim: #ff336633;
+  --success: #00ff88;
+  --success-dim: #00ff8833;
+  --gold: #ffd700;
+  --text: #e0e8f0;
+  --text-dim: #667788;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-display: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+}
+html, body {
+  height: 100%; width: 100%;
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: var(--font-body);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* ═══════════ ANIMATIONS ═══════════ */
+@keyframes glitch {
+  0%, 100% { transform: translate(0); filter: none; }
+  20% { transform: translate(-2px, 1px); filter: hue-rotate(90deg); }
+  40% { transform: translate(2px, -1px); filter: hue-rotate(-90deg); }
+  60% { transform: translate(-1px, -2px); }
+  80% { transform: translate(1px, 2px); filter: hue-rotate(180deg); }
+}
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+@keyframes pulse { 0%,100% { opacity: .6; } 50% { opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+@keyframes bootFlicker {
+  0% { opacity: 0; } 5% { opacity: 1; } 10% { opacity: 0; }
+  15% { opacity: 1; } 50% { opacity: 1; } 55% { opacity: 0; }
+  60% { opacity: 1; } 100% { opacity: 1; }
+}
+@keyframes successPulse {
+  0% { box-shadow: 0 0 0 0 var(--success); }
+  70% { box-shadow: 0 0 0 20px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+@keyframes borderGlow {
+  0%,100% { border-color: var(--accent-dim); }
+  50% { border-color: var(--accent); }
+}
+
+/* ═══════════ SCREENS ═══════════ */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transition: opacity .5s ease;
+  overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.screen.active { opacity: 1; pointer-events: all; }
+.screen::after {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(transparent, var(--accent-dim), transparent);
+  animation: scanline 4s linear infinite;
+  pointer-events: none; z-index: 100; opacity: .3;
+}
+
+/* ═══════════ BOOT SCREEN ═══════════ */
+#boot-screen {
+  justify-content: center; align-items: center;
+  background: var(--bg-deep); padding: 30px;
+}
+#boot-screen .logo {
+  font-family: var(--font-display);
+  font-size: 1.8rem; font-weight: 900;
+  letter-spacing: 6px; color: var(--accent);
+  text-shadow: 0 0 30px var(--accent-glow), 0 0 60px var(--accent-dim);
+  text-align: center; animation: bootFlicker 2s ease-in-out;
+  margin-bottom: 8px;
+}
+#boot-screen .subtitle {
+  font-family: var(--font-mono);
+  font-size: .75rem; color: var(--text-dim);
+  letter-spacing: 4px; text-transform: uppercase;
+  text-align: center; margin-bottom: 50px;
+}
+#boot-log {
+  font-family: var(--font-mono);
+  font-size: .7rem; color: var(--accent);
+  line-height: 1.8; max-width: 360px; width: 100%;
+  min-height: 180px;
+}
+#boot-log .line { opacity: 0; animation: fadeIn .3s forwards; }
+#boot-log .line.ok::after { content: ' [OK]'; color: var(--success); }
+#boot-log .line.warn::after { content: ' [!]'; color: var(--warn); }
+#boot-enter {
+  margin-top: 30px; display: none;
+  animation: fadeInUp .6s ease;
+}
+
+/* ═══════════ INTRO SCREEN ═══════════ */
+#intro-screen {
+  justify-content: center; align-items: center;
+  padding: 40px 24px; text-align: center;
+  background: radial-gradient(ellipse at center, #111122 0%, var(--bg-deep) 70%);
+}
+#intro-screen .classified {
+  font-family: var(--font-display);
+  font-size: .65rem; letter-spacing: 6px; color: var(--warn);
+  border: 1px solid var(--warn-dim);
+  padding: 6px 18px; display: inline-block;
+  margin-bottom: 30px; text-transform: uppercase;
+}
+#intro-screen .brief {
+  font-family: var(--font-body);
+  font-size: 1rem; line-height: 1.8; color: var(--text);
+  max-width: 340px; margin: 0 auto 40px; font-weight: 300;
+}
+#intro-screen .brief strong { color: var(--accent); font-weight: 600; }
+
+/* ═══════════ HUB SCREEN ═══════════ */
+#hub-screen { background: var(--bg-deep); }
+.hub-header { padding: 20px 20px 0; text-align: center; }
+.hub-header .codename {
+  font-family: var(--font-display);
+  font-size: .65rem; letter-spacing: 4px;
+  color: var(--accent); opacity: .7;
+}
+.hub-header .progress-label {
+  font-family: var(--font-mono);
+  font-size: .7rem; color: var(--text-dim); margin-top: 12px;
+}
+.progress-bar-wrap {
+  margin: 8px 20px 0; height: 3px;
+  background: var(--bg-card); border-radius: 2px; overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--success));
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+  border-radius: 2px; box-shadow: 0 0 10px var(--accent-glow);
+}
+.acts-container { padding: 20px; flex: 1; }
+.act-group { margin-bottom: 24px; }
+.act-title {
+  font-family: var(--font-display);
+  font-size: .6rem; letter-spacing: 3px; color: var(--text-dim);
+  text-transform: uppercase; margin-bottom: 10px; padding-left: 4px;
+  display: flex; align-items: center; gap: 8px;
+}
+.act-title .act-line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--text-dim), transparent); }
+.act-title.locked { color: #333; }
+.act-title.completed { color: var(--success); }
+
+.enigma-card {
+  background: var(--bg-card);
+  border: 1px solid #222233; border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer; transition: all .3s ease;
+  position: relative; overflow: hidden;
+}
+.enigma-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--text-dim); transition: background .3s;
+}
+.enigma-card.current::before { background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+.enigma-card.completed::before { background: var(--success); }
+.enigma-card.locked { opacity: .35; pointer-events: none; }
+.enigma-card.current { border-color: var(--accent-dim); }
+.enigma-card:active:not(.locked) { transform: scale(.98); }
+.enigma-num {
+  font-family: var(--font-display);
+  font-size: .7rem; font-weight: 700;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: var(--bg-panel);
+  color: var(--text-dim); flex-shrink: 0;
+}
+.enigma-card.current .enigma-num { color: var(--accent); border: 1px solid var(--accent-dim); }
+.enigma-card.completed .enigma-num { color: var(--success); border: 1px solid var(--success-dim); }
+.enigma-card.completed .enigma-num::after { content: '✓'; }
+.enigma-card.completed .enigma-num span { display: none; }
+.enigma-info { flex: 1; min-width: 0; }
+.enigma-type {
+  font-family: var(--font-mono);
+  font-size: .55rem; color: var(--text-dim);
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2px;
+}
+.enigma-title-text { font-size: .9rem; font-weight: 500; color: var(--text); }
+.enigma-card.locked .enigma-title-text { color: #444; }
+.enigma-card.locked .enigma-type { color: #333; }
+.enigma-arrow { font-size: 1rem; color: var(--text-dim); }
+.enigma-card.current .enigma-arrow { color: var(--accent); }
+.enigma-card.completed .enigma-arrow { color: var(--success); }
+
+/* ═══════════ ENIGMA SCREEN ═══════════ */
+#enigma-screen { background: var(--bg-deep); }
+.enigma-header {
+  padding: 16px 20px;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid #1a1a2a; flex-shrink: 0;
+}
+.back-btn {
+  background: none; border: 1px solid #333;
+  color: var(--text-dim);
+  width: 36px; height: 36px; border-radius: 8px;
+  font-size: 1.1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.back-btn:active { background: var(--bg-card); }
+.enigma-header-info { flex: 1; }
+.enigma-header-num {
+  font-family: var(--font-display);
+  font-size: .55rem; color: var(--accent); letter-spacing: 3px;
+}
+.enigma-header-type {
+  font-family: var(--font-mono);
+  font-size: .6rem; color: var(--text-dim); letter-spacing: 1px;
+}
+.hint-btn {
+  background: none; border: 1px solid var(--warn-dim);
+  color: var(--warn); font-family: var(--font-mono);
+  font-size: .6rem; padding: 6px 12px;
+  border-radius: 6px; cursor: pointer; letter-spacing: 1px;
+}
+.hint-btn:active { background: var(--warn-dim); }
+
+.enigma-body {
+  flex: 1; padding: 24px 20px;
+  display: flex; flex-direction: column; gap: 20px;
+  overflow-y: auto;
+}
+.enigma-narrative {
+  font-family: var(--font-mono);
+  font-size: .7rem; color: var(--accent); line-height: 1.6;
+  padding: 12px 16px; background: var(--accent-dim);
+  border-left: 2px solid var(--accent);
+  border-radius: 0 8px 8px 0; opacity: .9;
+}
+.enigma-question {
+  font-size: 1.1rem; font-weight: 400;
+  line-height: 1.7; color: var(--text); white-space: pre-line;
+}
+
+/* Solved banner */
+.solved-banner {
+  background: var(--success-dim);
+  border: 1px solid var(--success);
+  border-radius: 10px; padding: 14px 18px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: .8rem; color: var(--success);
+  letter-spacing: 2px;
+}
+.solved-answer {
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-size: 1rem; color: var(--text);
+  letter-spacing: 2px;
+}
+
+/* Answer section */
+.answer-section { margin-top: auto; padding-top: 16px; flex-shrink: 0; }
+.answer-input-wrap { display: flex; gap: 8px; }
+.answer-input {
+  flex: 1; background: var(--bg-card);
+  border: 1px solid #333; color: var(--text);
+  font-family: var(--font-body); font-size: 1rem;
+  padding: 14px 16px; border-radius: 10px; outline: none;
+  transition: border-color .3s;
+}
+.answer-input:focus { border-color: var(--accent); }
+.answer-input::placeholder { color: #444; }
+.submit-btn {
+  background: var(--accent); border: none;
+  color: var(--bg-deep); font-family: var(--font-display);
+  font-size: .7rem; font-weight: 700; letter-spacing: 2px;
+  padding: 14px 20px; border-radius: 10px;
+  cursor: pointer; white-space: nowrap;
+}
+.submit-btn:active { transform: scale(.95); }
+.feedback-msg {
+  font-family: var(--font-mono); font-size: .8rem;
+  text-align: center; padding: 10px; border-radius: 8px; display: none;
+  margin-bottom: 8px;
+}
+.feedback-msg.error { display: block; color: var(--warn); background: var(--warn-dim); animation: shake .4s ease; }
+.feedback-msg.success { display: block; color: var(--success); background: var(--success-dim); animation: successPulse .6s ease; }
+
+/* ═══════════ KEYPAD ═══════════ */
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 280px; margin: 0 auto; }
+.keypad-display {
+  grid-column: 1/-1; background: var(--bg-panel);
+  border: 1px solid #333; border-radius: 10px;
+  padding: 16px; font-family: var(--font-display);
+  font-size: 2rem; letter-spacing: 12px;
+  text-align: center; color: var(--accent);
+  min-height: 60px; display: flex; align-items: center; justify-content: center;
+}
+.keypad-display .digit { display: inline-block; width: 24px; text-align: center; }
+.keypad-display .digit.empty { border-bottom: 2px solid #333; margin: 0 4px; }
+.key-btn {
+  background: var(--bg-card); border: 1px solid #2a2a3a;
+  color: var(--text); font-family: var(--font-display);
+  font-size: 1.3rem; font-weight: 700; padding: 16px;
+  border-radius: 10px; cursor: pointer; transition: all .15s;
+}
+.key-btn:active { background: var(--accent-dim); transform: scale(.95); }
+.key-btn.action { font-size: .7rem; letter-spacing: 1px; }
+.key-btn.submit-key { background: var(--accent); color: var(--bg-deep); border-color: var(--accent); }
+
+/* ═══════════ PUZZLE ═══════════ */
+.puzzle-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 3px; max-width: 320px; margin: 0 auto;
+  aspect-ratio: 1; background: var(--bg-panel);
+  border-radius: 12px; padding: 3px; overflow: hidden;
+}
+.puzzle-piece {
+  aspect-ratio: 1; background: var(--accent-dim);
+  border-radius: 4px; cursor: grab; transition: transform .2s;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 1.4rem;
+  font-weight: 700; color: var(--accent); border: 1px solid #2a2a3a;
+}
+.puzzle-piece:active { transform: scale(.9); cursor: grabbing; }
+.puzzle-piece.empty { background: transparent; border: 1px dashed #333; cursor: default; }
+.puzzle-piece.correct { background: var(--success-dim); color: var(--success); border-color: var(--success-dim); }
+
+/* ═══════════ FLASHLIGHT ═══════════ */
+.flashlight-area {
+  position: relative; width: 100%; height: 300px;
+  background: #000; border-radius: 12px;
+  overflow: hidden; cursor: none; touch-action: none;
+}
+.flashlight-area .hidden-text {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: 1.6rem; font-weight: 900;
+  color: var(--accent); letter-spacing: 4px;
+  text-align: center; white-space: nowrap; pointer-events: none;
+}
+.flashlight-area .torch {
+  position: absolute; width: 120px; height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.15) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none; mix-blend-mode: screen;
+}
+
+/* ═══════════ NFC ═══════════ */
+.nfc-zone {
+  width: 200px; height: 200px;
+  border: 2px dashed var(--accent-dim); border-radius: 50%;
+  margin: 0 auto;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px; cursor: pointer; transition: all .3s;
+}
+.nfc-zone .nfc-icon { font-size: 3rem; animation: pulse 2s infinite; }
+.nfc-zone .nfc-label { font-family: var(--font-mono); font-size: .7rem; color: var(--text-dim); letter-spacing: 2px; }
+.nfc-zone.scanning { border-color: var(--accent); box-shadow: 0 0 30px var(--accent-dim); animation: successPulse 1s infinite; }
+
+/* ═══════════ GPS ═══════════ */
+.gps-radar {
+  width: 220px; height: 220px; border-radius: 50%;
+  border: 1px solid var(--accent-dim); margin: 0 auto;
+  position: relative; display: flex; align-items: center; justify-content: center;
+}
+.gps-radar .ring { position: absolute; border-radius: 50%; border: 1px solid var(--accent-dim); animation: pulse 3s infinite; }
+.gps-radar .ring:nth-child(1) { width: 60%; height: 60%; }
+.gps-radar .ring:nth-child(2) { width: 80%; height: 80%; animation-delay: .5s; }
+.gps-radar .ring:nth-child(3) { width: 100%; height: 100%; animation-delay: 1s; }
+.gps-radar .dot {
+  width: 12px; height: 12px; background: var(--accent);
+  border-radius: 50%; box-shadow: 0 0 15px var(--accent-glow);
+  z-index: 1; animation: pulse 1s infinite;
+}
+
+/* ═══════════ AUDIO ═══════════ */
+.audio-player { background: var(--bg-card); border-radius: 16px; padding: 24px; text-align: center; }
+.audio-wave { display: flex; align-items: center; justify-content: center; gap: 3px; height: 60px; margin-bottom: 16px; }
+.audio-wave .bar { width: 4px; background: var(--accent); border-radius: 2px; transition: height .15s; }
+.audio-controls { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.play-btn {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--accent); border: none;
+  color: var(--bg-deep); font-size: 1.4rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.play-btn:active { transform: scale(.9); }
+.speed-btn {
+  font-family: var(--font-mono); font-size: .6rem;
+  color: var(--accent); background: var(--accent-dim);
+  border: 1px solid var(--accent-dim); padding: 8px 14px;
+  border-radius: 8px; cursor: pointer; letter-spacing: 1px;
+}
+.speed-btn.active { background: var(--accent); color: var(--bg-deep); }
+.audio-native {
+  width: 100%; margin-top: 16px; border-radius: 8px;
+  filter: sepia(100%) saturate(300%) brightness(.8) hue-rotate(140deg);
+}
+.audio-status {
+  font-family: var(--font-mono); font-size: .6rem;
+  color: var(--text-dim); margin-top: 12px; letter-spacing: 1px;
+}
+
+/* ═══════════ REBUS ═══════════ */
+.rebus-container { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 20px; }
+.rebus-item {
+  font-size: 2.5rem; background: var(--bg-card);
+  border-radius: 12px; width: 70px; height: 70px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid #2a2a3a;
+}
+.rebus-plus { font-family: var(--font-display); font-size: 1.2rem; color: var(--text-dim); }
+.rebus-equals { font-family: var(--font-display); font-size: 1.5rem; color: var(--accent); }
+.rebus-answer-slot {
+  border: 2px dashed var(--accent-dim); border-radius: 12px;
+  padding: 12px 24px; font-family: var(--font-display);
+  font-size: 1.2rem; color: var(--accent); letter-spacing: 4px;
+  min-width: 120px; text-align: center;
+}
+
+/* ═══════════ FAKE BUG ═══════════ */
+#bug-screen { background: #000; justify-content: center; align-items: center; z-index: 999; }
+#bug-screen .bug-content { text-align: center; padding: 40px; }
+#bug-screen .bug-icon { font-size: 4rem; margin-bottom: 20px; animation: glitch 1s infinite; }
+#bug-screen .bug-text { font-family: var(--font-mono); font-size: .8rem; color: var(--warn); line-height: 2; }
+#bug-screen .bug-code { font-family: var(--font-mono); font-size: .6rem; color: #444; margin-top: 30px; line-height: 1.6; }
+
+/* ═══════════ VICTORY ═══════════ */
+#victory-screen {
+  background: radial-gradient(ellipse at center, #1a1a30 0%, var(--bg-deep) 70%);
+  justify-content: center; align-items: center;
+  padding: 40px 24px; text-align: center;
+}
+#victory-screen .vic-emoji { font-size: 4rem; margin-bottom: 20px; }
+#victory-screen .vic-title {
+  font-family: var(--font-display); font-size: 1.5rem;
+  font-weight: 900; color: var(--gold); letter-spacing: 4px;
+  margin-bottom: 12px; text-shadow: 0 0 30px rgba(255,215,0,.3);
+}
+#victory-screen .vic-text { font-size: 1rem; font-weight: 300; line-height: 1.8; color: var(--text); max-width: 320px; }
+
+/* ═══════════ ACT TRANSITION ═══════════ */
+#act-transition { background: var(--bg-deep); justify-content: center; align-items: center; text-align: center; padding: 40px; z-index: 50; }
+#act-transition .act-num {
+  font-family: var(--font-display); font-size: 3rem;
+  font-weight: 900; color: var(--accent);
+  text-shadow: 0 0 40px var(--accent-glow); margin-bottom: 8px;
+}
+#act-transition .act-name { font-family: var(--font-display); font-size: .8rem; letter-spacing: 6px; color: var(--text-dim); text-transform: uppercase; }
+
+/* ═══════════ BUTTONS ═══════════ */
+.btn-primary {
+  background: var(--accent); color: var(--bg-deep); border: none;
+  font-family: var(--font-display); font-size: .7rem;
+  font-weight: 700; letter-spacing: 3px; padding: 16px 32px;
+  border-radius: 10px; cursor: pointer; text-transform: uppercase;
+}
+.btn-primary:active { transform: scale(.95); }
+.btn-ghost {
+  background: transparent; color: var(--text-dim);
+  border: 1px solid #333; font-family: var(--font-mono);
+  font-size: .65rem; padding: 10px 20px; border-radius: 8px;
+  cursor: pointer; letter-spacing: 1px;
+}
+.btn-ghost:active { background: var(--bg-card); }
+
+/* ═══════════ DEV TOOLS ═══════════ */
+.dev-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #1a0a0a; border-top: 1px solid var(--warn-dim);
+  padding: 8px 16px; display: flex; gap: 8px;
+  align-items: center; z-index: 200;
+  font-family: var(--font-mono); font-size: .6rem;
+}
+.dev-bar button {
+  background: var(--warn-dim); border: 1px solid var(--warn);
+  color: var(--warn); padding: 4px 10px; border-radius: 4px;
+  font-family: var(--font-mono); font-size: .55rem;
+  cursor: pointer; letter-spacing: 1px;
+}
+.dev-bar span { color: var(--warn); letter-spacing: 1px; }
+
+@media (min-width: 500px) {
+  .screen { max-width: 430px; margin: 0 auto; border-left: 1px solid #1a1a2a; border-right: 1px solid #1a1a2a; }
+}
+</style>
+</head>
+<body>
+
+<!-- BOOT -->
+<div id="boot-screen" class="screen active">
+  <div class="logo">PROJET 1986</div>
+  <div class="subtitle">Système de réactivation</div>
+  <div id="boot-log"></div>
+  <button class="btn-primary" id="boot-enter" onclick="showScreen('intro-screen')">ENTRER</button>
+</div>
+
+<!-- INTRO -->
+<div id="intro-screen" class="screen">
+  <div class="classified">/// CONFIDENTIEL ///</div>
+  <div class="brief">
+    Agent, votre profil a été <strong>sélectionné</strong>.<br><br>
+    En <strong>1986</strong>, un sujet exceptionnel a vu le jour. Aujourd'hui, <strong>40 ans plus tard</strong>, il est temps de prouver que les années n'ont fait que renforcer ses capacités.<br><br>
+    <strong id="total-display">17 épreuves</strong> vous attendent. Logique, mémoire, agilité, culture… chaque réponse correcte vous rapproche de la <strong>récompense finale</strong>.<br><br>
+    Aucun retour en arrière possible.<br>
+    <span style="color:var(--warn)">Bonne chance.</span>
+  </div>
+  <button class="btn-primary" onclick="startGame()">ACCEPTER LA MISSION</button>
+</div>
+
+<!-- HUB -->
+<div id="hub-screen" class="screen">
+  <div class="hub-header">
+    <div class="codename">/// PROJET 1986 ///</div>
+    <div class="progress-label">PROGRESSION : <span id="progress-text">0/17</span></div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+  <div class="acts-container" id="acts-container"></div>
+</div>
+
+<!-- ENIGMA -->
+<div id="enigma-screen" class="screen">
+  <div class="enigma-header">
+    <button class="back-btn" onclick="showHub()">‹</button>
+    <div class="enigma-header-info">
+      <div class="enigma-header-num" id="enigma-label">ÉNIGME 01</div>
+      <div class="enigma-header-type" id="enigma-type-label"></div>
+    </div>
+    <button class="hint-btn" id="hint-btn" onclick="showHint()">INDICE</button>
+  </div>
+  <div class="enigma-body" id="enigma-body"></div>
+</div>
+
+<!-- ACT TRANSITION -->
+<div id="act-transition" class="screen">
+  <div class="act-num" id="act-trans-num"></div>
+  <div class="act-name" id="act-trans-name"></div>
+</div>
+
+<!-- FAKE BUG -->
+<div id="bug-screen" class="screen">
+  <div class="bug-content">
+    <div class="bug-icon">⚠️</div>
+    <div class="bug-text">
+      ERREUR SYSTÈME CRITIQUE<br>
+      Module [ENIGMA_CORE] corrompu<br>
+      Tentative de récupération...<br><br>
+      <span style="color:#666">Ne fermez pas l'application</span>
+    </div>
+    <div class="bug-code">
+      0x1986F: STACK_OVERFLOW<br>
+      at processEnigma() line 1986<br>
+      at validateAgent() line 40<br>
+      MEMORY DUMP: 47 55 41 44<br>
+      45 4C 4F 55 50 45
+    </div>
+  </div>
+</div>
+
+<!-- VICTORY -->
+<div id="victory-screen" class="screen">
+  <div class="vic-emoji">🎉</div>
+  <div class="vic-title">MISSION ACCOMPLIE</div>
+  <div class="vic-text">
+    Agent, vous avez prouvé que 40 ans n'est que le début.<br><br>
+    Votre récompense a été déverrouillée.<br><br>
+    <strong style="color:var(--gold)">Joyeux anniversaire !</strong>
+  </div>
+  <div style="margin-top:30px;">
+    <button class="btn-primary" onclick="resetGame()">REJOUER</button>
+  </div>
+</div>
+
+<!-- DEV BAR -->
+<div class="dev-bar" id="dev-bar">
+  <span>DEV</span>
+  <button onclick="devSkip()">SKIP ►</button>
+  <button onclick="devSolveAll()">ALL ✓</button>
+  <button onclick="resetGame()">RESET</button>
+  <button onclick="document.getElementById('dev-bar').style.display='none'">✕</button>
+</div>
+
+<!-- AUDIO ELEMENT (hidden) -->
+<audio id="fouras-audio" preload="auto" src="Fouras.m4a"></audio>
+
+<script>
+// ═══════════════════════ CONFIGURATION ═══════════════════════
+const ACT_BOUNDARIES = [0, 4, 8, 12, 17]; // indices where each act starts, last = total
+const ACTS = [
+  { name: "INITIALISATION", subtitle: "Vérification d'identité" },
+  { name: "CALIBRATION", subtitle: "Tests cognitifs" },
+  { name: "ÉPREUVES", subtitle: "Résistance mentale" },
+  { name: "ACTIVATION", subtitle: "Séquence finale" },
+];
+
+const ENIGMAS = [
+  // ── ACTE 1 : INITIALISATION (0-3) ──
+  {
+    id: 1, type: "Culture", format: "text",
+    narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
+    question: "Même s'il n'est pas menuisier, il a quand même ciré beaucoup de parquet.\nMalgré ses nombreux talents les briques n'ont jamais fait partie des habitudes.\nIl a été au sommet, mais tout le monde le souhaite à ses pieds.\n\nQui est-ce ?",
+    answer: ["jordan", "michael jordan"],
+    hint: "Sa Majesté de l'Air...",
+    title: "Bricolage"
+  },
+  {
+    id: 2, type: "Culture Ciné 80s", format: "text",
+    narrative: "MODULE CULTUREL > Scan des références générationnelles > Décennie 1986.",
+    question: "1986, tu pointais le bout de ton nez.\nLa même année il décide de prendre un peu de congés.\nVoiture de sport, casquette.\nEn une seule journée il vous a marqué pendant des années.\n\nQui est-ce ?",
+    answer: ["ferris bueller", "ferris", "bueller"],
+    hint: "\"Life moves pretty fast...\" 🎬",
+    title: "La légende"
+  },
+  {
+    id: 3, type: "Interaction", format: "flashlight",
+    narrative: "ALERTE > Coupure de courant détectée. Le message secret est caché dans l'obscurité.",
+    question: "Un message est caché dans le noir.\nUtilisez votre doigt comme lampe torche pour le révéler.",
+    hiddenText: "LUMIÈRE",
+    answer: ["lumiere", "lumière", "la lumiere", "la lumière", "allumer la lumiere", "allumer la lumière"],
+    hint: "Balayez l'écran noir avec votre doigt pour révéler le mot caché.",
+    title: "Et la lumière fut"
+  },
+  {
+    id: 4, type: "Rébus", format: "rebus",
+    narrative: "MODULE DÉCRYPTAGE > Séquence visuelle détectée. Interprétation requise.",
+    question: "Déchiffrez ce rébus :",
+    rebusItems: ["🐏", "➕", "♨️"],
+    rebusHint: "Animal + Sensation",
+    answer: ["ramothe", "ram hot", "ramotte"],
+    hint: "La première image = un bélier (ram). La deuxième = chaud ?",
+    title: "Symboles Cachés"
+  },
+
+  // ── ACTE 2 : CALIBRATION (4-7) ──
+  {
+    id: 5, type: "Audio Père Fouras", format: "audio",
+    narrative: "INTERCEPTION > Message audio capté. Le Père Fouras a parlé. Décodage nécessaire.",
+    question: "Un message audio a été intercepté.\nÉcoutez attentivement et trouvez la réponse à l'énigme du Père Fouras.",
+    answer: ["guadeloupe", "la guadeloupe"],
+    hint: "C'est une île française des Antilles en forme de papillon 🦋",
+    title: "Transmission Brouillée"
+  },
+  {
+    id: 6, type: "Position GPS", format: "gps",
+    narrative: "MODULE GPS > Coordonnées verrouillées. Déplacement physique requis.",
+    question: "Le système a détecté vos coordonnées.\nPour valider cette épreuve, rendez-vous à l'extérieur et appuyez sur le bouton de localisation.\n\n(En maquette : appuyez 3 fois sur le radar)",
+    answer: ["ok"],
+    hint: "Appuyez sur le radar pour simuler la géolocalisation.",
+    title: "Signal Localisé"
+  },
+  {
+    id: 7, type: "Suite Logique", format: "text",
+    narrative: "MODULE LOGIQUE > Séquence numérique incomplète détectée. Analyse requise.",
+    question: "Complétez la suite :\n\n21  —  22  —  26  —  ?\n\nEntrez le nombre manquant.",
+    answer: ["5", "05"],
+    hint: "Pensez à des numéros de maillot célèbres du basket 🏀 (les Bulls par exemple...)",
+    title: "La Suite Mystère"
+  },
+  {
+    id: 8, type: "Devinette", format: "text",
+    narrative: "MODULE ANALYTIQUE > Épreuve de raisonnement. Concentration maximale requise.",
+    question: "Tu es dans un bus qui part avec 6 passagers.\n\nÀ l'arrêt suivant, 3 montent et 2 descendent.\nAu suivant, 5 descendent et 4 montent.\n\nDe quelle couleur sont les yeux du chauffeur ?",
+    answer: ["noir", "marron", "noirs", "marrons", "brun", "bruns"],
+    hint: "Relisez la première phrase... QUI conduit le bus ? 👀",
+    title: "Le Piège du Bus"
+  },
+
+  // ── ACTE 3 : ÉPREUVES (8-11) ──
+  {
+    id: 9, type: "Devinette", format: "text",
+    narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
+    question: "Un homme regarde un portrait et dit :\n\n« Je n'ai ni frère ni sœur, mais le père de cet homme est le fils de mon père. »\n\nQui est la personne sur le portrait ?",
+    answer: ["son fils", "fils", "mon fils"],
+    hint: "\"Le fils de mon père\" = moi-même (puisqu'il n'a ni frère ni sœur)...",
+    title: "Le Portrait"
+  },
+  {
+    id: 10, type: "Mathématiques", format: "text",
+    narrative: "MODULE CALCUL > Équation à résoudre. Précision requise.",
+    question: "J'ajoute 2 au produit de deux nombres consécutifs supérieurs à 0 et j'obtiens 14.\n\nQuels sont ces deux nombres ?\n(Répondez sous la forme : X et Y)",
+    answer: ["3 et 4", "3et4", "3,4", "3 4"],
+    hint: "? × (? + 1) + 2 = 14 → ? × (? + 1) = 12",
+    title: "L'Équation"
+  },
+  {
+    id: 11, type: "Devinette", format: "text",
+    narrative: "MODULE PHILOSOPHIQUE > Pensée abstraite requise.",
+    question: "Je suis toujours devant toi,\nMais tu ne peux jamais me rattraper.\nPlus tu avances, plus j'avance aussi.\n\nQui suis-je ?",
+    answer: ["futur", "le futur", "l'avenir", "avenir", "demain"],
+    hint: "Nombreux veulent y voir, d'autres veulent en revenir",
+    title: "L'Insaisissable"
+  },
+  {
+    id: 12, type: "Faux Bug", format: "fakebug",
+    narrative: "", question: "",
+    answer: ["ok"],
+    hint: "Patience... le système va se rétablir 😏",
+    title: "/// ERREUR SYSTÈME ///"
+  },
+
+  // ── ACTE 4 : ACTIVATION (12-16) ──
+  {
+    id: 13, type: "Scan NFC", format: "nfc",
+    narrative: "MODULE NFC > Tag détecté à proximité. Approchez votre appareil.",
+    question: "Un tag NFC a été détecté.\nApprochez votre téléphone de la zone de scan.\n\n(En maquette : appuyez longuement sur la zone)",
+    answer: ["ok"],
+    hint: "Maintenez votre doigt sur la zone de scan pendant 3 secondes.",
+    title: "Signal Fantôme"
+  },
+  {
+    id: 14, type: "Culture Antilles", format: "text",
+    narrative: "MODULE CULTUREL > Scan régional > Identité caribéenne.",
+    question: "Fabriqué à partir de canne à sucre,\nje suis l'âme des Antilles.\nAgricole ou industriel,\nvieux ou blanc, je suis incontournable.\n\nQui suis-je ?",
+    answer: ["rhum", "le rhum", "rum"],
+    hint: "C'est une boisson spiritueuse emblématique de la Guadeloupe 🥃",
+    title: "L'Or des Antilles"
+  },
+  {
+    id: 15, type: "Code", format: "keypad",
+    narrative: "MODULE SÉCURITÉ > Code d'accès requis. 4 chiffres. Aucune erreur tolérée.",
+    question: "Entrez le code d'activation.\n\nIndice : L'année de naissance de l'agent.",
+    answer: ["1986"],
+    hint: "L'année où tout a commencé... 🎂",
+    title: "Code d'Activation"
+  },
+  {
+    id: 16, type: "Suite logique gourmande", format: "text",
+    narrative: "MODULE LOGIQUE > Séquence numérique incomplète détectée. Analyse requise.",
+    question: "Trouvez le résultat :\n\n🍟  -  8  -  9  -  1\n1  -  9  -🍔-  1\n0  -  2  -  0  -  2\n2  -  0  -  1  -  🍪\n🍕-  2  -  0  -  2\n\n🍔  x  🍕  +  🍪 - 2 x 🍟 = ?",
+    answer: ["5", "05"],
+    hint: "Vois-tu les années ?",
+    title: "La Faim"
+  },
+  {
+    id: 17, type: "Puzzle Final", format: "puzzle",
+    narrative: "SÉQUENCE FINALE > Reconstituez l'image pour déverrouiller la récompense.",
+    question: "Remettez les pièces dans l'ordre pour révéler le message final.\n\nAppuyez sur une pièce adjacente à l'espace vide pour la déplacer.",
+    answer: ["ok"],
+    hint: "Déplacez les pièces une à une vers l'espace vide, comme un taquin.",
+    title: "La Révélation"
+  },
+];
+
+const TOTAL = ENIGMAS.length;
+
+// ═══════════════════════ STATE ═══════════════════════
+let STATE = loadState();
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('projet1986_state');
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return { currentEnigma: 0, solved: [], hintUsed: [], started: false };
+}
+function saveState() {
+  try { localStorage.setItem('projet1986_state', JSON.stringify(STATE)); } catch(e) {}
+}
+
+// ═══════════════════════ AUDIO ═══════════════════════
+let audioCtx = null;
+function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+function playTone(freq, dur, type='sine') {
+  try {
+    const ctx = getAudio(); const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + dur);
+  } catch(e) {}
+}
+function playSuccess() { playTone(523,.1); setTimeout(()=>playTone(659,.1),100); setTimeout(()=>playTone(784,.2),200); }
+function playError() { playTone(200,.3,'sawtooth'); }
+function playBeep() { playTone(880,.05); }
+function playKeyBeep(ok) { playTone(ok?880:220,.15,ok?'sine':'square'); }
+
+// ═══════════════════════ SCREENS ═══════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ═══════════════════════ BOOT ═══════════════════════
+const bootLines = [
+  { text: "Initialisation du système...", cls: "ok", delay: 400 },
+  { text: "Chargement module PROJET_1986", cls: "ok", delay: 600 },
+  { text: "Vérification profil agent", cls: "ok", delay: 800 },
+  { text: "Connexion base de données", cls: "ok", delay: 500 },
+  { text: "Scan biométrique", cls: "warn", delay: 700 },
+  { text: `Calibration énigmes [${TOTAL}/${TOTAL}]`, cls: "ok", delay: 600 },
+  { text: "Chargement module GUADELOUPE", cls: "ok", delay: 400 },
+  { text: "Activation protocole ANNIVERSAIRE", cls: "ok", delay: 500 },
+  { text: "Système prêt", cls: "ok", delay: 300 },
+];
+
+function runBoot() {
+  // If already started, skip boot
+  if (STATE.started && STATE.solved.length > 0) {
+    showHub(); return;
+  }
+  const log = document.getElementById('boot-log');
+  let total = 0;
+  bootLines.forEach((line) => {
+    total += line.delay;
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = `line ${line.cls}`;
+      el.textContent = `> ${line.text}`;
+      log.appendChild(el); playBeep();
+      log.scrollTop = log.scrollHeight;
+    }, total);
+  });
+  // Show ENTER button after boot
+  setTimeout(() => {
+    const btn = document.getElementById('boot-enter');
+    btn.style.display = 'inline-block';
+  }, total + 800);
+}
+
+// ═══════════════════════ GAME START ═══════════════════════
+function startGame() {
+  STATE.started = true;
+  saveState();
+  showHub();
+}
+
+// ═══════════════════════ HUB ═══════════════════════
+function showHub() {
+  showScreen('hub-screen');
+  renderHub();
+}
+
+function getActForIndex(idx) {
+  for (let a = 0; a < ACT_BOUNDARIES.length - 1; a++) {
+    if (idx >= ACT_BOUNDARIES[a] && idx < ACT_BOUNDARIES[a+1]) return a;
+  }
+  return ACTS.length - 1;
+}
+
+function renderHub() {
+  const container = document.getElementById('acts-container');
+  container.innerHTML = '';
+  const solved = STATE.solved.length;
+  document.getElementById('progress-text').textContent = `${solved}/${TOTAL}`;
+  document.getElementById('progress-bar').style.width = `${(solved/TOTAL)*100}%`;
+
+  ACTS.forEach((act, ai) => {
+    const startIdx = ACT_BOUNDARIES[ai];
+    const endIdx = ACT_BOUNDARIES[ai + 1];
+    const actEnigmas = ENIGMAS.slice(startIdx, endIdx);
+    const allSolved = actEnigmas.every((_, i) => STATE.solved.includes(startIdx + i));
+    const anyAccessible = startIdx <= STATE.currentEnigma;
+
+    const group = document.createElement('div');
+    group.className = 'act-group';
+
+    const title = document.createElement('div');
+    title.className = `act-title ${allSolved ? 'completed' : !anyAccessible ? 'locked' : ''}`;
+    title.innerHTML = `ACTE ${ai+1} — ${act.name} <span class="act-line"></span>`;
+    group.appendChild(title);
+
+    actEnigmas.forEach((e, i) => {
+      const idx = startIdx + i;
+      const isSolved = STATE.solved.includes(idx);
+      const isCurrent = idx === STATE.currentEnigma;
+      const isLocked = idx > STATE.currentEnigma && !isSolved;
+
+      const card = document.createElement('div');
+      card.className = `enigma-card ${isSolved ? 'completed' : isCurrent ? 'current' : isLocked ? 'locked' : ''}`;
+      card.innerHTML = `
+        <div class="enigma-num"><span>${String(idx+1).padStart(2,'0')}</span></div>
+        <div class="enigma-info">
+          <div class="enigma-type">${e.type}</div>
+          <div class="enigma-title-text">${isLocked ? '██████████' : e.title}</div>
+        </div>
+        <div class="enigma-arrow">${isSolved ? '✓' : isCurrent ? '›' : isLocked ? '🔒' : '›'}</div>
+      `;
+      if (!isLocked) card.onclick = () => openEnigma(idx);
+      group.appendChild(card);
+    });
+    container.appendChild(group);
+  });
+}
+
+// ═══════════════════════ ACT TRANSITION ═══════════════════════
+function showActTransition(actIndex, callback) {
+  const act = ACTS[actIndex];
+  document.getElementById('act-trans-num').textContent = `ACTE ${actIndex + 1}`;
+  document.getElementById('act-trans-name').textContent = act.name;
+  showScreen('act-transition');
+  playTone(440,.2); setTimeout(()=>playTone(660,.3),200);
+  setTimeout(callback, 2500);
+}
+
+// ═══════════════════════ OPEN ENIGMA ═══════════════════════
+function openEnigma(idx) {
+  const e = ENIGMAS[idx];
+  const isSolved = STATE.solved.includes(idx);
+
+  // Fake bug
+  if (idx === 11 && e.format === 'fakebug' && !isSolved) {
+    triggerFakeBug(idx); return;
+  }
+
+  // Act transition for first unsolved in a new act
+  if (!isSolved && idx > 0) {
+    const actIdx = getActForIndex(idx);
+    const prevActIdx = getActForIndex(idx - 1);
+    if (actIdx !== prevActIdx && idx === ACT_BOUNDARIES[actIdx]) {
+      showActTransition(actIdx, () => renderEnigmaScreen(idx));
+      return;
+    }
+  }
+
+  renderEnigmaScreen(idx);
+}
+
+function renderEnigmaScreen(idx) {
+  const e = ENIGMAS[idx];
+  const isSolved = STATE.solved.includes(idx);
+  showScreen('enigma-screen');
+  document.getElementById('enigma-label').textContent = `ÉNIGME ${String(idx+1).padStart(2,'0')}/${TOTAL}`;
+  document.getElementById('enigma-type-label').textContent = e.type.toUpperCase();
+
+  const body = document.getElementById('enigma-body');
+  body.innerHTML = '';
+  body.dataset.idx = idx;
+
+  // Narrative
+  if (e.narrative) {
+    const narr = document.createElement('div');
+    narr.className = 'enigma-narrative';
+    narr.textContent = e.narrative;
+    body.appendChild(narr);
+  }
+
+  // Question
+  if (e.question) {
+    const q = document.createElement('div');
+    q.className = 'enigma-question';
+    q.textContent = e.question;
+    body.appendChild(q);
+  }
+
+  // If already solved, show solved state
+  if (isSolved) {
+    const banner = document.createElement('div');
+    banner.className = 'solved-banner';
+    banner.innerHTML = `✓ ÉPREUVE VALIDÉE`;
+    if (e.answer && e.answer[0] !== 'ok') {
+      banner.innerHTML += `<div class="solved-answer">${e.answer[0].toUpperCase()}</div>`;
+    }
+    body.appendChild(banner);
+    document.getElementById('hint-btn').style.display = 'none';
+    return;
+  }
+
+  // Hint button
+  document.getElementById('hint-btn').style.display = STATE.hintUsed.includes(idx) ? 'none' : '';
+  window._currentHint = e.hint;
+  window._currentIdx = idx;
+
+  // Show hint if already used
+  if (STATE.hintUsed.includes(idx)) {
+    const hint = document.createElement('div');
+    hint.className = 'enigma-narrative';
+    hint.style.borderLeftColor = 'var(--warn)';
+    hint.style.background = 'var(--warn-dim)';
+    hint.style.color = 'var(--warn)';
+    hint.textContent = '💡 INDICE : ' + e.hint;
+    body.appendChild(hint);
+  }
+
+  // Render format
+  switch (e.format) {
+    case 'text': renderTextInput(body, idx); break;
+    case 'flashlight': renderFlashlight(body, idx); break;
+    case 'rebus': renderRebus(body, idx); break;
+    case 'audio': renderAudioPlayer(body, idx); break;
+    case 'gps': renderGPS(body, idx); break;
+    case 'nfc': renderNFC(body, idx); break;
+    case 'keypad': renderKeypad(body, idx); break;
+    case 'puzzle': renderPuzzle(body, idx); break;
+  }
+}
+
+// ═══════════════════════ TEXT INPUT ═══════════════════════
+function renderTextInput(container, idx) {
+  const section = document.createElement('div');
+  section.className = 'answer-section';
+  section.innerHTML = `
+    <div class="feedback-msg" id="feedback"></div>
+    <div class="answer-input-wrap">
+      <input class="answer-input" id="answer-field" type="text" placeholder="Votre réponse..." autocomplete="off" autocapitalize="off">
+      <button class="submit-btn" onclick="checkTextAnswer(${idx})">VALIDER</button>
+    </div>
+  `;
+  container.appendChild(section);
+  setTimeout(() => document.getElementById('answer-field')?.focus(), 300);
+  document.getElementById('answer-field').addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') checkTextAnswer(idx);
+  });
+}
+
+function normalize(s) {
+  return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ');
+}
+
+function checkTextAnswer(idx) {
+  const field = document.getElementById('answer-field');
+  const feedback = document.getElementById('feedback');
+  const val = normalize(field.value);
+  if (!val) return;
+  const e = ENIGMAS[idx];
+  const correct = e.answer.some(a => {
+    const na = normalize(a);
+    return na === val || val.includes(na) || na.includes(val);
+  });
+  if (correct) {
+    feedback.className = 'feedback-msg success';
+    feedback.textContent = '✓ ACCÈS AUTORISÉ';
+    playSuccess();
+    setTimeout(() => solveEnigma(idx), 1000);
+  } else {
+    feedback.className = 'feedback-msg error';
+    feedback.textContent = '✗ RÉPONSE INCORRECTE';
+    playError();
+    field.value = '';
+    setTimeout(() => { feedback.className = 'feedback-msg'; }, 2000);
+  }
+}
+
+// ═══════════════════════ FLASHLIGHT ═══════════════════════
+function renderFlashlight(container, idx) {
+  const e = ENIGMAS[idx];
+  const area = document.createElement('div');
+  area.className = 'flashlight-area';
+  area.innerHTML = `<div class="hidden-text">${e.hiddenText}</div><div class="torch" id="torch" style="display:none"></div>`;
+  container.appendChild(area);
+  const torch = area.querySelector('.torch');
+  function moveTorch(x, y) {
+    const rect = area.getBoundingClientRect();
+    torch.style.display = 'block';
+    torch.style.left = (x - rect.left) + 'px';
+    torch.style.top = (y - rect.top) + 'px';
+  }
+  area.addEventListener('touchmove', (ev) => { ev.preventDefault(); moveTorch(ev.touches[0].clientX, ev.touches[0].clientY); }, { passive: false });
+  area.addEventListener('mousemove', (ev) => moveTorch(ev.clientX, ev.clientY));
+  area.addEventListener('touchend', () => torch.style.display = 'none');
+  area.addEventListener('mouseleave', () => torch.style.display = 'none');
+  renderTextInput(container, idx);
+}
+
+// ═══════════════════════ REBUS ═══════════════════════
+function renderRebus(container, idx) {
+  const e = ENIGMAS[idx];
+  const wrap = document.createElement('div');
+  wrap.className = 'rebus-container';
+  e.rebusItems.forEach((item, i) => {
+    if (i > 0) wrap.innerHTML += `<div class="rebus-plus">+</div>`;
+    wrap.innerHTML += `<div class="rebus-item">${item}</div>`;
+  });
+  wrap.innerHTML += `<div class="rebus-equals">=</div><div class="rebus-answer-slot">?</div>`;
+  container.appendChild(wrap);
+  if (e.rebusHint) {
+    const h = document.createElement('div');
+    h.style.cssText = 'text-align:center;font-size:.75rem;color:var(--text-dim);font-family:var(--font-mono);margin-top:8px;';
+    h.textContent = e.rebusHint;
+    container.appendChild(h);
+  }
+  renderTextInput(container, idx);
+}
+
+// ═══════════════════════ AUDIO (Père Fouras) ═══════════════════════
+function renderAudioPlayer(container, idx) {
+  const player = document.createElement('div');
+  player.className = 'audio-player';
+
+  let barsHtml = '<div class="audio-wave" id="audio-wave">';
+  for (let i = 0; i < 30; i++) barsHtml += `<div class="bar" style="height:${10+Math.random()*40}px"></div>`;
+  barsHtml += '</div>';
+
+  player.innerHTML = `
+    ${barsHtml}
+    <div class="audio-controls">
+      <button class="play-btn" id="play-btn" onclick="toggleAudio()">▶</button>
+    </div>
+    <div class="audio-controls" style="margin-top:12px">
+      <button class="speed-btn" onclick="setSpeed(0.5)">×0.5</button>
+      <button class="speed-btn active" onclick="setSpeed(1)">×1</button>
+      <button class="speed-btn" onclick="setSpeed(1.5)">×1.5</button>
+    </div>
+    <div class="audio-status" id="audio-status">PRÊT — APPUYEZ SUR ▶</div>
+  `;
+  container.appendChild(player);
+  renderTextInput(container, idx);
+
+  // Setup audio
+  const audio = document.getElementById('fouras-audio');
+  audio.playbackRate = 1;
+  audio.currentTime = 0;
+  window._audioPlaying = false;
+
+  audio.onplay = () => {
+    window._audioPlaying = true;
+    document.getElementById('play-btn').textContent = '⏸';
+    document.getElementById('audio-status').textContent = 'LECTURE EN COURS...';
+    startWaveAnim();
+  };
+  audio.onpause = () => {
+    window._audioPlaying = false;
+    document.getElementById('play-btn').textContent = '▶';
+    document.getElementById('audio-status').textContent = 'EN PAUSE';
+    stopWaveAnim();
+  };
+  audio.onended = () => {
+    window._audioPlaying = false;
+    document.getElementById('play-btn').textContent = '▶';
+    document.getElementById('audio-status').textContent = 'TERMINÉ — REJOUEZ OU RÉPONDEZ';
+    stopWaveAnim();
+  };
+}
+
+window.toggleAudio = function() {
+  const audio = document.getElementById('fouras-audio');
+  if (window._audioPlaying) { audio.pause(); } else { audio.play().catch(()=>{}); }
+};
+
+window.setSpeed = function(rate) {
+  const audio = document.getElementById('fouras-audio');
+  audio.playbackRate = rate;
+  document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+};
+
+let waveInterval = null;
+function startWaveAnim() {
+  stopWaveAnim();
+  waveInterval = setInterval(() => {
+    document.querySelectorAll('#audio-wave .bar').forEach(b => b.style.height = (5+Math.random()*50)+'px');
+  }, 100);
+}
+function stopWaveAnim() {
+  if (waveInterval) { clearInterval(waveInterval); waveInterval = null; }
+}
+
+// ═══════════════════════ GPS ═══════════════════════
+function renderGPS(container, idx) {
+  const radar = document.createElement('div');
+  radar.className = 'gps-radar';
+  radar.innerHTML = `<div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="dot"></div>`;
+  radar.style.cursor = 'pointer';
+  let clicks = 0;
+  radar.onclick = () => { clicks++; playBeep(); if (clicks >= 3) { playSuccess(); setTimeout(()=>solveEnigma(idx),500); } };
+  container.appendChild(radar);
+  const info = document.createElement('div');
+  info.style.cssText = 'text-align:center;font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);margin-top:16px;';
+  info.textContent = 'Appuyez 3 fois sur le radar pour confirmer votre position';
+  container.appendChild(info);
+}
+
+// ═══════════════════════ NFC ═══════════════════════
+function renderNFC(container, idx) {
+  const zone = document.createElement('div');
+  zone.className = 'nfc-zone';
+  zone.innerHTML = `<div class="nfc-icon">📡</div><div class="nfc-label">ZONE DE SCAN NFC</div>`;
+  let timer = null, holding = false;
+  function startScan() {
+    holding = true; zone.classList.add('scanning');
+    zone.querySelector('.nfc-label').textContent = 'SCAN EN COURS...';
+    playTone(440,.1);
+    timer = setTimeout(() => {
+      if (holding) { zone.querySelector('.nfc-label').textContent = 'TAG DÉTECTÉ ✓'; playSuccess(); setTimeout(()=>solveEnigma(idx),800); }
+    }, 3000);
+  }
+  function stopScan() { holding = false; if(timer)clearTimeout(timer); zone.classList.remove('scanning'); zone.querySelector('.nfc-label').textContent = 'ZONE DE SCAN NFC'; }
+  zone.addEventListener('mousedown', startScan);
+  zone.addEventListener('mouseup', stopScan);
+  zone.addEventListener('touchstart', (e)=>{e.preventDefault();startScan();});
+  zone.addEventListener('touchend', stopScan);
+  container.appendChild(zone);
+}
+
+// ═══════════════════════ KEYPAD ═══════════════════════
+function renderKeypad(container, idx) {
+  const code = ENIGMAS[idx].answer[0]; let entered = '';
+  const wrap = document.createElement('div'); wrap.className = 'keypad';
+  const display = document.createElement('div'); display.className = 'keypad-display'; display.id = 'keypad-display';
+  wrap.appendChild(display);
+  function updateDisplay() {
+    let h = '';
+    for (let i=0;i<4;i++) h += i<entered.length ? `<span class="digit">${entered[i]}</span>` : `<span class="digit empty">&nbsp;</span>`;
+    display.innerHTML = h;
+  }
+  updateDisplay();
+  for (let n=1;n<=9;n++) { const b=document.createElement('button'); b.className='key-btn'; b.textContent=n; b.onclick=()=>pressKey(String(n)); wrap.appendChild(b); }
+  const clr=document.createElement('button'); clr.className='key-btn action'; clr.textContent='CLR'; clr.onclick=()=>{entered='';updateDisplay();playBeep();}; wrap.appendChild(clr);
+  const z=document.createElement('button'); z.className='key-btn'; z.textContent='0'; z.onclick=()=>pressKey('0'); wrap.appendChild(z);
+  const ent=document.createElement('button'); ent.className='key-btn submit-key action'; ent.textContent='ENT'; ent.onclick=()=>submitCode(); wrap.appendChild(ent);
+  container.appendChild(wrap);
+  const fb=document.createElement('div'); fb.className='feedback-msg'; fb.id='feedback'; container.appendChild(fb);
+
+  function pressKey(d) { if(entered.length>=4)return; entered+=d; playKeyBeep(entered[entered.length-1]===code[entered.length-1]); updateDisplay(); }
+  function submitCode() {
+    const feedback=document.getElementById('feedback');
+    if (entered===code) { feedback.className='feedback-msg success'; feedback.textContent='✓ CODE ACCEPTÉ'; playSuccess(); setTimeout(()=>solveEnigma(idx),1000); }
+    else { feedback.className='feedback-msg error'; feedback.textContent='✗ CODE INCORRECT'; playError(); entered=''; updateDisplay(); setTimeout(()=>{feedback.className='feedback-msg';},2000); }
+  }
+}
+
+// ═══════════════════════ PUZZLE ═══════════════════════
+function renderPuzzle(container, idx) {
+  const labels = ['J','O','Y','E','U','X','4','0','A','N','S','!','2','0','2',''];
+  const size = 4; let tiles = [...Array(16).keys()];
+  function shuffle() { for(let i=0;i<200;i++){const e=tiles.indexOf(15);const n=[];if(e%size!==0)n.push(e-1);if(e%size!==size-1)n.push(e+1);if(e>=size)n.push(e-size);if(e<size*(size-1))n.push(e+size);const p=n[Math.floor(Math.random()*n.length)];[tiles[e],tiles[p]]=[tiles[p],tiles[e]];} }
+  shuffle();
+  const grid = document.createElement('div'); grid.className='puzzle-grid'; grid.id='puzzle-grid'; container.appendChild(grid);
+  function renderGrid() {
+    grid.innerHTML='';
+    tiles.forEach((t,i) => {
+      const p = document.createElement('div');
+      p.className = `puzzle-piece ${t===15?'empty':''} ${t===i&&t!==15?'correct':''}`;
+      p.textContent = t===15?'':labels[t];
+      if(t!==15) p.onclick = () => moveTile(i);
+      grid.appendChild(p);
+    });
+  }
+  function moveTile(ci) {
+    const ei=tiles.indexOf(15); const r=Math.floor(ci/size),c=ci%size,er=Math.floor(ei/size),ec=ei%size;
+    if((Math.abs(r-er)===1&&c===ec)||(Math.abs(c-ec)===1&&r===er)) {
+      [tiles[ci],tiles[ei]]=[tiles[ei],tiles[ci]]; playBeep(); renderGrid();
+      if(tiles.every((t,i)=>t===i)){playSuccess();setTimeout(()=>solveEnigma(idx),1200);}
+    }
+  }
+  renderGrid();
+  const info=document.createElement('div'); info.style.cssText='text-align:center;font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);margin-top:12px;'; info.textContent='Formez : JOYEUX 40 ANS! 202_'; container.appendChild(info);
+}
+
+// ═══════════════════════ FAKE BUG ═══════════════════════
+function triggerFakeBug(idx) {
+  showScreen('bug-screen');
+  // Reset bug screen content
+  document.querySelector('#bug-screen .bug-content').innerHTML = `
+    <div class="bug-icon">⚠️</div>
+    <div class="bug-text">ERREUR SYSTÈME CRITIQUE<br>Module [ENIGMA_CORE] corrompu<br>Tentative de récupération...<br><br><span style="color:#666">Ne fermez pas l'application</span></div>
+    <div class="bug-code">0x1986F: STACK_OVERFLOW<br>at processEnigma() line 1986<br>at validateAgent() line 40<br>MEMORY DUMP: 47 55 41 44<br>45 4C 4F 55 50 45</div>
+  `;
+  playTone(100,1,'sawtooth'); setTimeout(()=>playTone(80,.5,'square'),500);
+  setTimeout(() => {
+    document.querySelector('#bug-screen .bug-content').innerHTML = `
+      <div class="bug-icon" style="animation:none">😏</div>
+      <div class="bug-text" style="color:var(--success)">
+        SYSTÈME RÉTABLI<br><br>Tu y as cru, hein ?<br>Ce n'était qu'un test de<br><strong>résistance au stress</strong>.<br><br>
+        <span style="color:var(--accent)">Bien joué, Agent.</span>
+      </div>
+    `;
+    playSuccess();
+    setTimeout(() => solveEnigma(idx), 3000);
+  }, 6000);
+}
+
+// ═══════════════════════ SOLVE ═══════════════════════
+function solveEnigma(idx) {
+  if (!STATE.solved.includes(idx)) {
+    STATE.solved.push(idx);
+    STATE.currentEnigma = Math.max(STATE.currentEnigma, idx + 1);
+    saveState();
+  }
+  // Stop audio if playing
+  try { document.getElementById('fouras-audio').pause(); } catch(e) {}
+
+  if (STATE.solved.length >= TOTAL) {
+    setTimeout(() => showScreen('victory-screen'), 500);
+    return;
+  }
+  const nextIdx = STATE.currentEnigma;
+  const nextAct = getActForIndex(nextIdx);
+  const prevAct = getActForIndex(nextIdx - 1);
+  if (nextIdx < TOTAL && nextAct !== prevAct) {
+    showActTransition(nextAct, () => showHub());
+  } else {
+    showHub();
+  }
+}
+
+// ═══════════════════════ HINT ═══════════════════════
+function showHint() {
+  const idx = window._currentIdx;
+  if (!STATE.hintUsed.includes(idx)) { STATE.hintUsed.push(idx); saveState(); }
+  document.getElementById('hint-btn').style.display = 'none';
+  const body = document.getElementById('enigma-body');
+  const hint = document.createElement('div');
+  hint.className = 'enigma-narrative';
+  hint.style.borderLeftColor = 'var(--warn)';
+  hint.style.background = 'var(--warn-dim)';
+  hint.style.color = 'var(--warn)';
+  hint.textContent = '💡 INDICE : ' + window._currentHint;
+  body.insertBefore(hint, body.children[1] || null);
+}
+
+// ═══════════════════════ DEV TOOLS ═══════════════════════
+function devSkip() {
+  const idx = STATE.currentEnigma;
+  if (idx < TOTAL) solveEnigma(idx);
+}
+function devSolveAll() {
+  for (let i = 0; i < TOTAL; i++) { if (!STATE.solved.includes(i)) STATE.solved.push(i); }
+  STATE.currentEnigma = TOTAL;
+  saveState();
+  showScreen('victory-screen');
+}
+function resetGame() {
+  STATE = { currentEnigma: 0, solved: [], hintUsed: [], started: false };
+  saveState();
+  location.reload();
+}
+
+// ═══════════════════════ INIT ═══════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('total-display').textContent = TOTAL + ' épreuves';
+  runBoot();
+  // Register Service Worker for PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(r => console.log('SW registered')).catch(e => console.log('SW error', e));
+  }
+});
+</script>
+</body>
+</html>
