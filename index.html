@@ -395,20 +395,133 @@ html, body {
 .nfc-zone .nfc-label { font-family: var(--font-mono); font-size: .7rem; color: var(--text-dim); letter-spacing: 2px; }
 .nfc-zone.scanning { border-color: var(--accent); box-shadow: 0 0 30px var(--accent-dim); animation: successPulse 1s infinite; }
 
-/* ═══════════ GPS ═══════════ */
-.gps-radar {
-  width: 220px; height: 220px; border-radius: 50%;
-  border: 1px solid var(--accent-dim); margin: 0 auto;
-  position: relative; display: flex; align-items: center; justify-content: center;
+/* ═══════════ GPS RADAR ═══════════ */
+@keyframes radarSweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
-.gps-radar .ring { position: absolute; border-radius: 50%; border: 1px solid var(--accent-dim); animation: pulse 3s infinite; }
-.gps-radar .ring:nth-child(1) { width: 60%; height: 60%; }
-.gps-radar .ring:nth-child(2) { width: 80%; height: 80%; animation-delay: .5s; }
-.gps-radar .ring:nth-child(3) { width: 100%; height: 100%; animation-delay: 1s; }
-.gps-radar .dot {
-  width: 12px; height: 12px; background: var(--accent);
-  border-radius: 50%; box-shadow: 0 0 15px var(--accent-glow);
-  z-index: 1; animation: pulse 1s infinite;
+@keyframes radarPing {
+  0% { transform: scale(0); opacity: .8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+.gps-module { text-align: center; }
+.gps-radar {
+  width: 240px; height: 240px; border-radius: 50%;
+  border: 2px solid var(--accent-dim); margin: 0 auto;
+  position: relative; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle, #0a1a20 0%, #060d10 70%, #030608 100%);
+  overflow: hidden;
+}
+.gps-radar .grid-h, .gps-radar .grid-v {
+  position: absolute; background: var(--accent-dim);
+}
+.gps-radar .grid-h { width: 100%; height: 1px; top: 50%; }
+.gps-radar .grid-v { height: 100%; width: 1px; left: 50%; }
+.gps-radar .ring {
+  position: absolute; border-radius: 50%;
+  border: 1px solid #00f0ff18;
+}
+.gps-radar .ring:nth-child(3) { width: 33%; height: 33%; }
+.gps-radar .ring:nth-child(4) { width: 66%; height: 66%; }
+.gps-radar .ring:nth-child(5) { width: 100%; height: 100%; }
+.gps-radar .sweep {
+  position: absolute; top: 0; left: 50%;
+  width: 50%; height: 50%;
+  transform-origin: bottom left;
+  animation: radarSweep 3s linear infinite;
+  background: conic-gradient(from 0deg, transparent 0%, #00f0ff30 100%);
+  border-radius: 0 100% 0 0;
+}
+.gps-radar .center-dot {
+  width: 8px; height: 8px; background: var(--accent);
+  border-radius: 50%; box-shadow: 0 0 12px var(--accent-glow);
+  z-index: 5; position: relative;
+}
+.gps-radar .target-blip {
+  position: absolute; width: 10px; height: 10px;
+  background: var(--warn); border-radius: 50%;
+  box-shadow: 0 0 10px var(--warn);
+  z-index: 4; display: none;
+  animation: pulse 1s infinite;
+}
+.gps-radar .ping {
+  position: absolute; width: 10px; height: 10px;
+  border: 2px solid var(--warn); border-radius: 50%;
+  z-index: 3; display: none;
+  animation: radarPing 2s ease-out infinite;
+}
+.gps-compass {
+  display: flex; justify-content: space-between;
+  width: 260px; margin: 0 auto; padding: 4px 6px;
+  font-family: var(--font-mono); font-size: .5rem;
+  color: var(--text-dim); letter-spacing: 2px;
+}
+.gps-distance-wrap {
+  margin: 16px auto 0; max-width: 260px;
+}
+.gps-distance-bar {
+  height: 6px; background: var(--bg-card);
+  border-radius: 3px; overflow: hidden;
+  border: 1px solid #222;
+}
+.gps-distance-fill {
+  height: 100%; width: 0%;
+  border-radius: 3px;
+  transition: width 1s ease, background .5s ease;
+}
+.gps-distance-label {
+  display: flex; justify-content: space-between;
+  margin-top: 6px;
+  font-family: var(--font-mono); font-size: .55rem;
+}
+.gps-distance-value {
+  color: var(--text); font-weight: 600;
+}
+.gps-distance-status {
+  color: var(--text-dim);
+}
+.gps-status {
+  font-family: var(--font-mono); font-size: .65rem;
+  color: var(--text-dim); margin-top: 16px;
+  letter-spacing: 1px; min-height: 40px; line-height: 1.6;
+}
+.gps-secret-reveal {
+  margin-top: 16px; padding: 16px;
+  background: var(--success-dim);
+  border: 1px solid var(--success);
+  border-radius: 12px;
+  animation: fadeInUp .6s ease;
+}
+.gps-secret-reveal .label {
+  font-family: var(--font-mono);
+  font-size: .6rem; color: var(--success);
+  letter-spacing: 2px; margin-bottom: 8px;
+}
+.gps-secret-reveal .code {
+  font-family: var(--font-display);
+  font-size: 1.8rem; font-weight: 900;
+  color: var(--text); letter-spacing: 8px;
+  text-shadow: 0 0 20px var(--success-dim);
+}
+.gps-btn-locate {
+  background: var(--accent); color: var(--bg-deep);
+  border: none; font-family: var(--font-display);
+  font-size: .65rem; font-weight: 700; letter-spacing: 2px;
+  padding: 14px 28px; border-radius: 10px;
+  cursor: pointer; margin-top: 16px;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.gps-btn-locate:active { transform: scale(.95); }
+.gps-btn-locate:disabled {
+  opacity: .5; cursor: not-allowed;
+}
+.gps-btn-locate .spinner {
+  width: 14px; height: 14px;
+  border: 2px solid transparent;
+  border-top-color: var(--bg-deep);
+  border-radius: 50%;
+  animation: radarSweep .8s linear infinite;
+  display: none;
 }
 
 /* ═══════════ AUDIO ═══════════ */
@@ -688,15 +801,18 @@ const ENIGMAS = [
     narrative: "INTERCEPTION > Message audio capté. Le Père Fouras a parlé. Décodage nécessaire.",
     question: "Un message audio a été intercepté.\nÉcoutez attentivement et trouvez la réponse à l'énigme du Père Fouras.",
     answer: ["guadeloupe", "la guadeloupe"],
-    hint: "De l'endroit à l'envers, il n'y a qu'un pas",
-    title: "pas"
+    hint: "C'est une île française des Antilles en forme de papillon 🦋",
+    title: "Transmission Brouillée"
   },
   {
     id: 6, type: "Position GPS", format: "gps",
-    narrative: "MODULE GPS > Coordonnées verrouillées. Déplacement physique requis.",
-    question: "Le système a détecté vos coordonnées.\nPour valider cette épreuve, rendez-vous à l'extérieur et appuyez sur le bouton de localisation.\n\n(En maquette : appuyez 3 fois sur le radar)",
-    answer: ["ok"],
-    hint: "Appuyez sur le radar pour simuler la géolocalisation.",
+    narrative: "MODULE GPS > Signal crypté détecté. Déplacement physique requis pour décoder.",
+    question: "Un signal a été localisé. Déplacez-vous jusqu'à la zone cible pour décrypter le message secret.",
+    gpsTarget: { lat: 48.11404, lng: -1.65848 },
+    gpsRadius: 500,
+    gpsSecret: "OMBRE",
+    answer: ["ombre", "l'ombre"],
+    hint: "Approchez-vous du point cible... le radar vous guide !",
     title: "Signal Localisé"
   },
   {
@@ -810,6 +926,7 @@ function saveState() {
 
 // ═══════════════════════ AUDIO ═══════════════════════
 let audioCtx = null;
+let gpsWatchId = null;
 function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
 function playTone(freq, dur, type='sine') {
   try {
@@ -878,6 +995,11 @@ function startGame() {
 
 // ═══════════════════════ HUB ═══════════════════════
 function showHub() {
+  // Cleanup GPS watch if active
+  if (gpsWatchId !== null) {
+    navigator.geolocation.clearWatch(gpsWatchId);
+    gpsWatchId = null;
+  }
   showScreen('hub-screen');
   renderHub();
 }
@@ -1197,18 +1319,222 @@ function stopWaveAnim() {
 }
 
 // ═══════════════════════ GPS ═══════════════════════
+
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const toRad = x => x * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function bearingTo(lat1, lon1, lat2, lon2) {
+  const toRad = x => x * Math.PI / 180;
+  const toDeg = x => x * 180 / Math.PI;
+  const dLon = toRad(lon2 - lon1);
+  const y = Math.sin(dLon) * Math.cos(toRad(lat2));
+  const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+  return (toDeg(Math.atan2(y, x)) + 360) % 360;
+}
+
 function renderGPS(container, idx) {
-  const radar = document.createElement('div');
-  radar.className = 'gps-radar';
-  radar.innerHTML = `<div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="dot"></div>`;
-  radar.style.cursor = 'pointer';
-  let clicks = 0;
-  radar.onclick = () => { clicks++; playBeep(); if (clicks >= 3) { playSuccess(); setTimeout(()=>solveEnigma(idx),500); } };
-  container.appendChild(radar);
-  const info = document.createElement('div');
-  info.style.cssText = 'text-align:center;font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);margin-top:16px;';
-  info.textContent = 'Appuyez 3 fois sur le radar pour confirmer votre position';
-  container.appendChild(info);
+  const e = ENIGMAS[idx];
+  const TARGET = e.gpsTarget;
+  const RADIUS = e.gpsRadius;
+  const SECRET = e.gpsSecret;
+
+  const module = document.createElement('div');
+  module.className = 'gps-module';
+  module.innerHTML = `
+    <div class="gps-radar" id="gps-radar">
+      <div class="grid-h"></div>
+      <div class="grid-v"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="sweep"></div>
+      <div class="target-blip" id="gps-blip"></div>
+      <div class="ping" id="gps-ping"></div>
+      <div class="center-dot"></div>
+    </div>
+    <div class="gps-compass"><span>O</span><span>N</span><span>·</span><span>S</span><span>E</span></div>
+    <div class="gps-distance-wrap">
+      <div class="gps-distance-bar"><div class="gps-distance-fill" id="gps-fill"></div></div>
+      <div class="gps-distance-label">
+        <span class="gps-distance-value" id="gps-dist-val">— m</span>
+        <span class="gps-distance-status" id="gps-dist-status">EN ATTENTE</span>
+      </div>
+    </div>
+    <div class="gps-status" id="gps-status">Activez la géolocalisation pour détecter le signal.</div>
+    <button class="gps-btn-locate" id="gps-btn" onclick="startGPSTracking(${idx})">
+      <span class="spinner" id="gps-spinner"></span>
+      📍 ACTIVER LE SCAN GPS
+    </button>
+    <div id="gps-secret-zone"></div>
+  `;
+  container.appendChild(module);
+}
+
+window.startGPSTracking = function(idx) {
+  const e = ENIGMAS[idx];
+  const TARGET = e.gpsTarget;
+  const RADIUS = e.gpsRadius;
+  const SECRET = e.gpsSecret;
+  const btn = document.getElementById('gps-btn');
+  const spinner = document.getElementById('gps-spinner');
+  const status = document.getElementById('gps-status');
+
+  if (!navigator.geolocation) {
+    status.innerHTML = '<span style="color:var(--warn)">⚠ Géolocalisation non supportée par ce navigateur.</span>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="display:inline-block"></span> SCAN EN COURS...';
+  status.textContent = 'Recherche du signal GPS...';
+  playTone(440, .15);
+
+  // Stop previous watch
+  if (gpsWatchId !== null) navigator.geolocation.clearWatch(gpsWatchId);
+
+  let revealed = false;
+  let bestDist = Infinity;
+
+  gpsWatchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const acc = Math.round(pos.coords.accuracy);
+      const dist = haversineDistance(lat, lng, TARGET.lat, TARGET.lng);
+      const bearing = bearingTo(lat, lng, TARGET.lat, TARGET.lng);
+
+      bestDist = Math.min(bestDist, dist);
+
+      // Update radar blip position
+      updateRadarBlip(dist, bearing, RADIUS);
+
+      // Update distance bar
+      updateDistanceBar(dist, RADIUS);
+
+      // Update status text
+      const distDisplay = dist > 1000 ? (dist/1000).toFixed(1) + ' km' : Math.round(dist) + ' m';
+      document.getElementById('gps-dist-val').textContent = distDisplay;
+
+      if (dist <= RADIUS && !revealed) {
+        // SUCCESS — within range!
+        revealed = true;
+        navigator.geolocation.clearWatch(gpsWatchId);
+        gpsWatchId = null;
+        btn.style.display = 'none';
+
+        status.innerHTML = '<span style="color:var(--success)">✓ SIGNAL DÉCRYPTÉ — ZONE ATTEINTE</span>';
+        document.getElementById('gps-dist-status').textContent = 'DANS LA ZONE';
+        document.getElementById('gps-dist-status').style.color = 'var(--success)';
+
+        playSuccess();
+
+        // Reveal secret code
+        const zone = document.getElementById('gps-secret-zone');
+        zone.innerHTML = `
+          <div class="gps-secret-reveal">
+            <div class="label">/// CODE DÉCRYPTÉ ///</div>
+            <div class="code">${SECRET}</div>
+          </div>
+        `;
+
+        // Add text input for answer
+        const body = document.getElementById('enigma-body');
+        renderTextInput(body, idx);
+
+      } else if (dist <= RADIUS * 2) {
+        status.innerHTML = `<span style="color:var(--success)">🔥 TRÈS PROCHE ! Continuez...</span><br><span style="font-size:.5rem;color:var(--text-dim)">Précision : ±${acc}m</span>`;
+        document.getElementById('gps-dist-status').textContent = 'SIGNAL FORT';
+        document.getElementById('gps-dist-status').style.color = 'var(--success)';
+      } else if (dist <= RADIUS * 5) {
+        status.innerHTML = `<span style="color:var(--gold)">📡 Signal détecté. Rapprochez-vous.</span><br><span style="font-size:.5rem;color:var(--text-dim)">Précision : ±${acc}m</span>`;
+        document.getElementById('gps-dist-status').textContent = 'SIGNAL MOYEN';
+        document.getElementById('gps-dist-status').style.color = 'var(--gold)';
+      } else {
+        status.innerHTML = `<span style="color:var(--warn)">📡 Signal faible. Vous êtes loin de la cible.</span><br><span style="font-size:.5rem;color:var(--text-dim)">Précision : ±${acc}m</span>`;
+        document.getElementById('gps-dist-status').textContent = 'SIGNAL FAIBLE';
+        document.getElementById('gps-dist-status').style.color = 'var(--warn)';
+      }
+
+      // Beep faster when closer
+      if (!revealed) {
+        const beepFreq = dist < RADIUS * 2 ? 300 : dist < RADIUS * 5 ? 600 : 1500;
+        playTone(800 - Math.min(dist/5, 600), .05);
+      }
+    },
+    (err) => {
+      console.error('GPS error:', err);
+      btn.disabled = false;
+      btn.innerHTML = '📍 RÉESSAYER';
+      if (err.code === 1) {
+        status.innerHTML = '<span style="color:var(--warn)">⚠ Accès GPS refusé. Autorisez la géolocalisation dans les paramètres de votre navigateur.</span>';
+      } else if (err.code === 2) {
+        status.innerHTML = '<span style="color:var(--warn)">⚠ Position indisponible. Sortez à l\'extérieur et réessayez.</span>';
+      } else {
+        status.innerHTML = '<span style="color:var(--warn)">⚠ Timeout GPS. Réessayez en extérieur.</span>';
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    }
+  );
+};
+
+function updateRadarBlip(dist, bearing, radius) {
+  const blip = document.getElementById('gps-blip');
+  const ping = document.getElementById('gps-ping');
+  const radar = document.getElementById('gps-radar');
+  if (!blip || !radar) return;
+
+  blip.style.display = 'block';
+  ping.style.display = 'block';
+
+  // Map distance to radar radius (max displayed = radius * 10)
+  const maxDisplayDist = radius * 10;
+  const normalizedDist = Math.min(dist / maxDisplayDist, 1);
+  const radarR = 100; // half of radar size in px
+  const blipR = normalizedDist * radarR * 0.85;
+
+  const angleRad = (bearing - 90) * Math.PI / 180; // CSS: 0deg = right
+  const bx = 120 + blipR * Math.cos(angleRad) - 5;
+  const by = 120 + blipR * Math.sin(angleRad) - 5;
+
+  blip.style.left = bx + 'px';
+  blip.style.top = by + 'px';
+  ping.style.left = bx + 'px';
+  ping.style.top = by + 'px';
+
+  // Color based on distance
+  const color = dist <= radius ? 'var(--success)' : dist <= radius * 2 ? 'var(--gold)' : 'var(--warn)';
+  blip.style.background = color;
+  blip.style.boxShadow = `0 0 10px ${color}`;
+  ping.style.borderColor = color;
+}
+
+function updateDistanceBar(dist, radius) {
+  const fill = document.getElementById('gps-fill');
+  if (!fill) return;
+
+  const maxDist = radius * 10;
+  const pct = Math.max(0, Math.min(100, (1 - dist / maxDist) * 100));
+  fill.style.width = pct + '%';
+
+  if (dist <= radius) {
+    fill.style.background = 'linear-gradient(90deg, var(--success), #00ffaa)';
+  } else if (dist <= radius * 2) {
+    fill.style.background = 'linear-gradient(90deg, var(--gold), #ffaa00)';
+  } else if (dist <= radius * 5) {
+    fill.style.background = 'linear-gradient(90deg, #ff8800, var(--gold))';
+  } else {
+    fill.style.background = 'linear-gradient(90deg, var(--warn), #ff6644)';
+  }
 }
 
 // ═══════════════════════ NFC ═══════════════════════
@@ -1320,6 +1646,8 @@ function solveEnigma(idx) {
   }
   // Stop audio if playing
   try { document.getElementById('fouras-audio').pause(); } catch(e) {}
+  // Stop GPS tracking if active
+  if (gpsWatchId !== null) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
 
   if (STATE.solved.length >= TOTAL) {
     setTimeout(() => showScreen('victory-screen'), 500);
