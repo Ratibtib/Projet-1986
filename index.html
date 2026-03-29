@@ -1927,27 +1927,29 @@ function startCamera() {
     `;
   });
 }
-function toggleFilter(color, emoji) {
+  
+let currentFilter = null;
+
+function setFilter(color, emoji) {
   const filter = document.getElementById('cam-filter');
   const toggle = document.getElementById('cam-toggle');
   const label = document.getElementById('cam-filter-label');
   if (!filter || !toggle) return;
 
-  const isOn = filter.classList.contains(color);
+  const isSame = currentFilter === color;
 
-  // RESET complet (évite les conflits)
   filter.className = 'camera-filter';
   toggle.className = 'camera-toggle';
-  
-  if (isOn) {
-    // OFF
+
+  if (isSame) {
+    currentFilter = null;
     filter.classList.add('off');
     toggle.classList.add('off');
     toggle.innerHTML = emoji;
     label.className = 'filter-label inactive';
     label.textContent = 'FILTRE OFF';
   } else {
-    // ON
+    currentFilter = color;
     filter.classList.add(color);
     toggle.classList.add('on');
     toggle.innerHTML = '⬤';
@@ -1956,11 +1958,6 @@ function toggleFilter(color, emoji) {
     playTone(600, .1);
   }
 }
-
-// Wrappers propres
-window.toggleRedFilter = () => toggleFilter('red', '🔴');
-window.toggleGreenFilter = () => toggleFilter('green', '🟢');
-window.toggleBlueFilter = () => toggleFilter('blue', '🔵');
 
 window.flipCamera = function() {
   window._camFacingMode = window._camFacingMode === 'environment' ? 'user' : 'environment';
