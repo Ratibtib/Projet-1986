@@ -1879,11 +1879,20 @@ function updateDistanceBar(dist, radius) {
   }
 }
 
-// ═══════════════════════ CAMERA (Red/Green/Blue Filter) ═══════════════════════
-
-// création du canvas dans le module caméra
+// ═══════════════════════ CAMERA MODULE COMPLETE ═══════════════════════
+let cameraStream = null;
+let currentFilter = null;
 let canvas, ctx;
 
+// Arrêter la caméra
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+}
+
+// Initialiser le canvas pour le traitement vidéo
 function initCanvas(video) {
   canvas = document.createElement('canvas');
   ctx = canvas.getContext('2d');
@@ -1899,7 +1908,7 @@ function initCanvas(video) {
   if (viewfinder) viewfinder.appendChild(canvas);
 }
 
-// boucle de traitement vidéo
+// Boucle de traitement vidéo
 function processFrame() {
   const video = document.getElementById('cam-video');
   if (!video || video.readyState < 2 || !canvas) {
@@ -1907,7 +1916,7 @@ function processFrame() {
     return;
   }
 
-  // adapter canvas à la taille réelle de la vidéo
+  // Adapter canvas à la taille réelle
   if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -1916,14 +1925,14 @@ function processFrame() {
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   let frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
   if (currentFilter) {
-    frame = applyColorFilter(frame, currentFilter); // 'red', 'green', 'blue'
+    frame = applyColorFilter(frame, currentFilter);
   }
   ctx.putImageData(frame, 0, 0);
 
   requestAnimationFrame(processFrame);
 }
 
-// fonction applyColorFilter comme précédemment
+// Fonction de filtre couleur pro
 function applyColorFilter(imageData, mode = 'red') {
   const data = imageData.data;
   for (let i = 0; i < data.length; i += 4) {
@@ -1938,14 +1947,14 @@ function applyColorFilter(imageData, mode = 'red') {
       case 'blue': score = b - Math.max(r, g); break;
     }
 
-    const threshold = 50;
+    const threshold = 50; // ajustable selon luminosité
     const value = score > threshold ? 255 : 0;
     data[i] = data[i + 1] = data[i + 2] = value;
   }
   return imageData;
 }
 
-// démarrage caméra modifié pour lancer canvas et traitement
+// Démarrage de la caméra
 function startCamera() {
   stopCamera();
   const video = document.getElementById('cam-video');
@@ -1959,8 +1968,7 @@ function startCamera() {
     cameraStream = stream;
     video.srcObject = stream;
     video.play().catch(() => {});
-    
-    // attendre que la vidéo soit prête
+
     video.onloadedmetadata = () => {
       initCanvas(video);
       processFrame();
@@ -1976,6 +1984,81 @@ function startCamera() {
       </div>
     `;
   });
+}
+
+// Toggle filtre rouge/vert/bleu
+function toggleFilter(color, btn, emoji) {
+  const label = document.getElementById('cam-filter-label');
+  if (!label) return;
+
+  const isSame = currentFilter === color;
+
+  // Reset tous les boutons
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.remove('on');
+    b.classList.add('off');
+    b.innerHTML = b.dataset.emoji;
+  });
+
+  if (isSame) {
+    currentFilter = null;
+    label.className = 'filter-label inactive';
+    label.textContent = 'FILTRE OFF';
+  } else {
+    currentFilter = color;
+    btn.classList.remove('off');
+    btn.classList.add('on');
+    btn.innerHTML = '⬤';
+    label.className = 'filter-label active';
+    label.textContent = '■ FILTRE';
+  }
+}
+
+// Flip caméra avant/arrière
+window.flipCamera = function() {
+  window._camFacingMode = window._camFacingMode === 'environment' ? 'user' : 'environment';
+  startCamera();
+}
+
+// Render module caméra complet
+function renderCamera(container, idx) {
+  const module = document.createElement('div');
+  module.className = 'camera-module';
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    module.innerHTML = `
+      <div class="camera-no-support">
+        📷<br>Caméra non supportée sur ce navigateur.<br>
+        Essayez avec Chrome sur mobile.
+      </div>
+    `;
+    container.appendChild(module);
+    return;
+  }
+
+  module.innerHTML = `
+    <div class="camera-viewfinder" id="cam-viewfinder">
+      <video id="cam-video" autoplay playsinline muted></video>
+      <div class="camera-hud">
+        <div class="rec">REC</div>
+        <div class="filter-label inactive" id="cam-filter-label">FILTRE OFF</div>
+      </div>
+    </div>
+    <div class="camera-controls">
+      <button class="camera-toggle off filter-btn" data-emoji="🔴" onclick="toggleFilter('red', this, '🔴')">🔴</button>
+      <button class="camera-toggle off filter-btn" data-emoji="🟢" onclick="toggleFilter('green', this, '🟢')">🟢</button>
+      <button class="camera-toggle off filter-btn" data-emoji="🔵" onclick="toggleFilter('blue', this, '🔵')">🔵</button>
+      <button class="camera-flip" id="cam-flip" onclick="flipCamera()">🔄</button>
+    </div>
+    <div class="camera-instructions">
+      Activez le filtre rouge puis pointez la caméra<br>
+      vers le document secret pour révéler le message.
+    </div>
+  `;
+  container.appendChild(module);
+
+  window._camFacingMode = 'environment';
+  startCamera();
 }
 
   
