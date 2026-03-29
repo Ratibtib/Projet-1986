@@ -1879,61 +1879,73 @@ function updateDistanceBar(dist, radius) {
   }
 }
 
-// ═══════════════════════ CAMERA (Red Filter) ═══════════════════════
-function stopCamera() {
-  if (cameraStream) {
-    cameraStream.getTracks().forEach(t => t.stop());
-    cameraStream = null;
-  }
+// ═══════════════════════ CAMERA (Red/Green/Blue Filter) ═══════════════════════
+
+// création du canvas dans le module caméra
+let canvas, ctx;
+
+function initCanvas(video) {
+  canvas = document.createElement('canvas');
+  ctx = canvas.getContext('2d');
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  canvas.style.position = 'absolute';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.style.zIndex = '1'; // sous HUD
+  const viewfinder = document.getElementById('cam-viewfinder');
+  if (viewfinder) viewfinder.appendChild(canvas);
 }
 
-function renderCamera(container, idx) {
-  const module = document.createElement('div');
-  module.className = 'camera-module';
-
-  // Check camera support
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    module.innerHTML = `
-      <div class="camera-no-support">
-        📷<br>Caméra non supportée sur ce navigateur.<br>
-        Essayez avec Chrome sur mobile.
-      </div>
-    `;
-    container.appendChild(module);
-    renderTextInput(container, idx);
+// boucle de traitement vidéo
+function processFrame() {
+  const video = document.getElementById('cam-video');
+  if (!video || video.readyState < 2 || !canvas) {
+    requestAnimationFrame(processFrame);
     return;
   }
 
-  module.innerHTML = `
-    <div class="camera-viewfinder" id="cam-viewfinder">
-      <video id="cam-video" autoplay playsinline muted></video>
-      <div class="camera-filter off" id="cam-filter"></div>
-      <div class="camera-scanline"></div>
-      <div class="camera-hud">
-        <div class="rec">REC</div>
-        <div class="filter-label inactive" id="cam-filter-label">FILTRE OFF</div>
-      </div>
-    </div>
-    <div class="camera-controls">
-      <button class="camera-toggle off filter-btn" data-emoji="🔴" onclick="toggleFilter('red', this, '🔴')">🔴</button>
-      <button class="camera-toggle off filter-btn" data-emoji="🟢" onclick="toggleFilter('green', this, '🟢')">🟢</button>
-      <button class="camera-toggle off filter-btn" data-emoji="🔵" onclick="toggleFilter('blue', this, '🔵')">🔵</button>
-      <button class="camera-flip" id="cam-flip" onclick="flipCamera()">🔄</button>
-    </div>
-    <div class="camera-instructions">
-      Activez le filtre rouge puis pointez la caméra<br>
-      vers le document secret pour révéler le message.
-    </div>
-  `;
-  container.appendChild(module);
+  // adapter canvas à la taille réelle de la vidéo
+  if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+  }
 
-  // Start camera (back camera by default)
-  window._camFacingMode = 'environment';
-  startCamera();
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  let frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  if (currentFilter) {
+    frame = applyColorFilter(frame, currentFilter); // 'red', 'green', 'blue'
+  }
+  ctx.putImageData(frame, 0, 0);
 
-  renderTextInput(container, idx);
+  requestAnimationFrame(processFrame);
 }
 
+// fonction applyColorFilter comme précédemment
+function applyColorFilter(imageData, mode = 'red') {
+  const data = imageData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+
+    let score = 0;
+    switch (mode) {
+      case 'red': score = r - Math.max(g, b); break;
+      case 'green': score = g - Math.max(r, b); break;
+      case 'blue': score = b - Math.max(r, g); break;
+    }
+
+    const threshold = 50;
+    const value = score > threshold ? 255 : 0;
+    data[i] = data[i + 1] = data[i + 2] = value;
+  }
+  return imageData;
+}
+
+// démarrage caméra modifié pour lancer canvas et traitement
 function startCamera() {
   stopCamera();
   const video = document.getElementById('cam-video');
@@ -1947,6 +1959,12 @@ function startCamera() {
     cameraStream = stream;
     video.srcObject = stream;
     video.play().catch(() => {});
+    
+    // attendre que la vidéo soit prête
+    video.onloadedmetadata = () => {
+      initCanvas(video);
+      processFrame();
+    };
   })
   .catch(err => {
     console.error('Camera error:', err);
@@ -1959,72 +1977,8 @@ function startCamera() {
     `;
   });
 }
+
   
-let currentFilter = null;
-
-function toggleFilter(color, btn, emoji) {
-  const filter = document.getElementById('cam-filter');
-  const label = document.getElementById('cam-filter-label');
-  if (!filter) return;
-
-  const isSame = currentFilter === color;
-
-  // reset filtre visuel
-  filter.classList.remove('red', 'green', 'blue', 'off');
-
-  // reset TOUS les boutons
-  document.querySelectorAll('.filter-btn').forEach(b => {
-  b.classList.remove('on');
-  b.classList.add('off');
-  b.innerHTML = b.dataset.emoji;
-});
-
-  if (isSame) {
-    // OFF
-    currentFilter = null;
-    filter.classList.add('off');
-
-    btn.innerHTML = emoji;
-
-    label.className = 'filter-label inactive';
-    label.textContent = 'FILTRE OFF';
-
-  } else {
-    // ON
-    currentFilter = color;
-    filter.classList.add(color);
-
-    btn.classList.remove('off');
-    btn.classList.add('on');
-    btn.innerHTML = '⬤';
-
-    label.className = 'filter-label active';
-    label.textContent = '■ FILTRE';
-
-    playTone(600, .1);
-  }
-}
-
-window.flipCamera = function() {
-  window._camFacingMode = window._camFacingMode === 'environment' ? 'user' : 'environment';
-  startCamera();
-  playBeep();
-}
-const canvas = document.createElement('canvas');
-const ctx = canvas.getContext('2d');
-canvas.width = video.videoWidth;
-canvas.height = video.videoHeight;
-document.body.appendChild(canvas); // ou ajoute-le dans ton module caméra
-
-function processFrame() {
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  let frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  frame = applyColorFilter(frame, currentMode); // 'red', 'green', 'blue'
-  ctx.putImageData(frame, 0, 0);
-  requestAnimationFrame(processFrame);
-}
-
-processFrame();
 
 // ═══════════════════════ NFC ═══════════════════════
 function renderNFC(container, idx) {
