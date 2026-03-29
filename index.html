@@ -468,6 +468,41 @@ html, body {
   background: rgba(10,10,15,.7);
   padding: 2px 8px; border-radius: 4px;
 }
+.gps-edge-blip {
+  position: absolute;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--warn);
+  box-shadow: 0 0 10px var(--warn), 0 0 20px rgba(255,51,102,.3);
+  z-index: 502;
+  display: none;
+  transform: translate(-50%, -50%);
+  animation: pulse 1s infinite;
+}
+.gps-edge-blip .edge-arrow {
+  position: absolute;
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 8px solid var(--warn);
+  top: -10px; left: 50%;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 0 4px var(--warn));
+}
+.gps-edge-dist {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: .45rem;
+  color: var(--warn);
+  white-space: nowrap;
+  z-index: 502;
+  display: none;
+  transform: translate(-50%, -50%);
+  background: rgba(10,10,15,.8);
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+}
 /* Vignette effect for round edges */
 .gps-map-wrap::after {
   content: '';
@@ -805,7 +840,7 @@ const ENIGMAS = [
     rebusItems: ["🐏", "➕", "♨️"],
     rebusHint: "Animal + Sensation",
     answer: ["ramothe", "ram hot", "ramotte"],
-    hint: "La première image = un bélier. La deuxième = chaud ?",
+    hint: "La première image = un bélier (ram). La deuxième = chaud ?",
     title: "Symboles Cachés"
   },
 
@@ -814,16 +849,16 @@ const ENIGMAS = [
     id: 5, type: "Audio Père Fouras", format: "audio",
     narrative: "INTERCEPTION > Message audio capté. Le Père Fouras a parlé. Décodage nécessaire.",
     question: "Un message audio a été intercepté.\nÉcoutez attentivement et trouvez la réponse à l'énigme du Père Fouras.",
-    answer: ["pas","un pas"],
-    hint: "De l'endroit à l'envers, il n'y a qu'un pas.",
+    answer: ["guadeloupe", "la guadeloupe"],
+    hint: "C'est une île française des Antilles en forme de papillon 🦋",
     title: "Transmission Brouillée"
   },
   {
     id: 6, type: "Position GPS", format: "gps",
     narrative: "MODULE GPS > Signal crypté détecté. Déplacement physique requis pour décoder.",
     question: "Un signal a été localisé. Déplacez-vous jusqu'à la zone cible pour décrypter le message secret.",
-    gpsTarget: { lat: 48.107761, lng: -1.677833 },
-    gpsRadius: 40,
+    gpsTarget: { lat: 48.11404, lng: -1.65848 },
+    gpsRadius: 500,
     gpsSecret: "OMBRE",
     answer: ["ombre", "l'ombre"],
     hint: "Approchez-vous du point cible... le radar vous guide !",
@@ -1281,9 +1316,6 @@ function renderAudioPlayer(container, idx) {
       <button class="speed-btn" onclick="setSpeed(1.5)">×1.5</button>
     </div>
     <div class="audio-status" id="audio-status">PRÊT — APPUYEZ SUR ▶</div>
-    <div class="audio-download" style="margin-top:8px">
-    <a href="https://1drv.ms/u/c/c5a2a521a2670743/IQBikpQfjRRaQ4iGv2pte795Aev7GRtGaeW71MKyULa_1YY?e=2pgV8t" download>Télécharger le fichier</a>
-  </div>
   `;
   container.appendChild(player);
   renderTextInput(container, idx);
@@ -1353,6 +1385,81 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
+function bearingTo(lat1, lon1, lat2, lon2) {
+  const toRad = x => x * Math.PI / 180;
+  const toDeg = x => x * 180 / Math.PI;
+  const dLon = toRad(lon2 - lon1);
+  const y = Math.sin(dLon) * Math.cos(toRad(lat2));
+  const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+  return (toDeg(Math.atan2(y, x)) + 360) % 360;
+}
+
+function distToZoom(dist) {
+  // Progressive zoom: 10km+ → zoom 12 (20km diameter), 0m → zoom 17
+  const MAX_DIST = 10000; // 10km radius = 20km diameter
+  const MIN_ZOOM = 12;
+  const MAX_ZOOM = 17;
+  const clamped = Math.max(50, Math.min(dist, MAX_DIST));
+  // Logarithmic interpolation for smooth feel
+  const t = 1 - Math.log(clamped / 50) / Math.log(MAX_DIST / 50);
+  return MIN_ZOOM + t * (MAX_ZOOM - MIN_ZOOM);
+}
+
+function updateEdgeBlip(lat, lng, targetLat, targetLng, dist) {
+  const blip = document.getElementById('gps-edge-blip');
+  const label = document.getElementById('gps-edge-dist');
+  if (!blip || !gpsMap) return;
+
+  // Check if target is visible on map
+  const targetPoint = gpsMap.latLngToContainerPoint([targetLat, targetLng]);
+  const mapSize = gpsMap.getSize();
+  const cx = mapSize.x / 2;
+  const cy = mapSize.y / 2;
+  const radius = Math.min(cx, cy);
+  const dx = targetPoint.x - cx;
+  const dy = targetPoint.y - cy;
+  const distFromCenter = Math.sqrt(dx*dx + dy*dy);
+
+  if (distFromCenter < radius - 15) {
+    // Target is visible on map, hide edge blip
+    blip.style.display = 'none';
+    label.style.display = 'none';
+    return;
+  }
+
+  // Target is off-screen — show blip at edge of circle
+  const bearing = bearingTo(lat, lng, targetLat, targetLng);
+  const angleRad = (bearing - 90) * Math.PI / 180; // CSS: 0=right, -90=top
+  const edgeR = 122; // slightly inside the 130px radius of the 260px circle
+  const bx = 130 + edgeR * Math.cos(angleRad);
+  const by = 130 + edgeR * Math.sin(angleRad);
+
+  blip.style.display = 'block';
+  blip.style.left = bx + 'px';
+  blip.style.top = by + 'px';
+
+  // Rotate arrow to point toward target
+  const arrow = blip.querySelector('.edge-arrow');
+  if (arrow) arrow.style.transform = `translateX(-50%) rotate(${bearing}deg)`;
+
+  // Distance label slightly inward
+  const labelR = edgeR - 18;
+  const lx = 130 + labelR * Math.cos(angleRad);
+  const ly = 130 + labelR * Math.sin(angleRad);
+  const distText = dist > 1000 ? (dist/1000).toFixed(1) + 'km' : Math.round(dist) + 'm';
+  label.style.display = 'block';
+  label.style.left = lx + 'px';
+  label.style.top = ly + 'px';
+  label.textContent = distText;
+
+  // Color based on distance
+  const color = dist <= 500 ? '#00ff88' : dist <= 1000 ? '#ffd700' : '#ff3366';
+  blip.style.background = color;
+  blip.style.boxShadow = `0 0 10px ${color}, 0 0 20px ${color}44`;
+  arrow.style.borderBottomColor = color;
+  label.style.color = color;
+}
+
 function renderGPS(container, idx) {
   const e = ENIGMAS[idx];
   const module = document.createElement('div');
@@ -1369,6 +1476,8 @@ function renderGPS(container, idx) {
         <div class="ring-overlay"></div>
         <div class="scan-label">SCAN ACTIF</div>
       </div>
+      <div class="gps-edge-blip" id="gps-edge-blip"><div class="edge-arrow"></div></div>
+      <div class="gps-edge-dist" id="gps-edge-dist"></div>
     </div>
     <div class="gps-distance-wrap">
       <div class="gps-distance-bar"><div class="gps-distance-fill" id="gps-fill"></div></div>
@@ -1507,10 +1616,11 @@ window.startGPSTracking = function(idx) {
           gpsAccuracyCircle.setRadius(acc);
         }
 
-        // Always center map on player, zoom based on distance
+        // Always center map on player, progressive zoom based on distance
         if (gpsMap) {
-          const zoomLevel = dist > 5000 ? 12 : dist > 2000 ? 13 : dist > 800 ? 14 : dist > 300 ? 15 : 16;
-          gpsMap.setView([lat, lng], zoomLevel, { animate: true, duration: 1 });
+          gpsMap.setView([lat, lng], distToZoom(dist), { animate: true, duration: 1 });
+          // Update edge blip for target visibility
+          updateEdgeBlip(lat, lng, TARGET.lat, TARGET.lng, dist);
         }
 
         // Update target zone color based on proximity
@@ -1547,6 +1657,11 @@ window.startGPSTracking = function(idx) {
 
         // Flash map zone green
         if (gpsTargetZone) gpsTargetZone.setStyle({ fillOpacity: 0.3 });
+        // Hide edge indicator
+        const eb = document.getElementById('gps-edge-blip');
+        const ed = document.getElementById('gps-edge-dist');
+        if (eb) eb.style.display = 'none';
+        if (ed) ed.style.display = 'none';
 
         const zone = document.getElementById('gps-secret-zone');
         zone.innerHTML = `
