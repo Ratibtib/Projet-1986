@@ -596,6 +596,8 @@ html, body {
   transition: background .4s ease;
 }
 .camera-filter.red { background: rgba(255, 0, 0, .85); }
+.camera-filter.green { background: rgba(0, 255, 0, .85); }
+.camera-filter.blue { background: rgba(0, 0, 255, .85); }
 .camera-filter.off { background: transparent; }
 .camera-scanline {
   position: absolute; inset: 0;
@@ -1876,7 +1878,13 @@ function renderCamera(container, idx) {
     </div>
     <div class="camera-controls">
       <button class="camera-toggle off" id="cam-toggle" onclick="toggleRedFilter()">
-        🔴 FILTRE ROUGE
+        🔴
+      </button>
+      <button class="camera-toggle off" id="cam-toggle" onclick="toggleGreenFilter()">
+        🟢
+      </button>
+      <button class="camera-toggle off" id="cam-toggle" onclick="toggleBlueFilter()">
+        🔵
       </button>
       <button class="camera-flip" id="cam-flip" onclick="flipCamera()">🔄</button>
     </div>
@@ -1931,6 +1939,52 @@ window.toggleRedFilter = function() {
     filter.className = 'camera-filter off';
     toggle.className = 'camera-toggle off';
     toggle.innerHTML = '🔴 FILTRE ROUGE';
+    label.className = 'filter-label inactive';
+    label.textContent = 'FILTRE OFF';
+  } else {
+    filter.className = 'camera-filter red';
+    toggle.className = 'camera-toggle on';
+    toggle.innerHTML = '⬤ FILTRE ACTIF';
+    label.className = 'filter-label active';
+    label.textContent = '■ FILTRE RED';
+    playTone(600, .1);
+  }
+};
+
+window.toggleGreenFilter = function() {
+  const filter = document.getElementById('cam-filter');
+  const toggle = document.getElementById('cam-toggle');
+  const label = document.getElementById('cam-filter-label');
+  if (!filter || !toggle) return;
+
+  const isOn = filter.classList.contains('green');
+  if (isOn) {
+    filter.className = 'camera-filter off';
+    toggle.className = 'camera-toggle off';
+    toggle.innerHTML = '🟢';
+    label.className = 'filter-label inactive';
+    label.textContent = 'FILTRE OFF';
+  } else {
+    filter.className = 'camera-filter green';
+    toggle.className = 'camera-toggle on';
+    toggle.innerHTML = '⬤ FILTRE ACTIF';
+    label.className = 'filter-label active';
+    label.textContent = '■ FILTRE RED';
+    playTone(600, .1);
+  }
+};
+
+window.toggleBlueFilter = function() {
+  const filter = document.getElementById('cam-filter');
+  const toggle = document.getElementById('cam-toggle');
+  const label = document.getElementById('cam-filter-label');
+  if (!filter || !toggle) return;
+
+  const isOn = filter.classList.contains('blue');
+  if (isOn) {
+    filter.className = 'camera-filter off';
+    toggle.className = 'camera-toggle off';
+    toggle.innerHTML = '🔵';
     label.className = 'filter-label inactive';
     label.textContent = 'FILTRE OFF';
   } else {
