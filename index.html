@@ -586,25 +586,19 @@ html, body {
   background: #000;
 }
 .camera-viewfinder video {
+  display: none; /* hidden — we draw to canvas instead */
+}
+.camera-viewfinder canvas {
   width: 100%; height: 100%;
   object-fit: cover;
+  display: block;
 }
-.camera-filter {
-  position: absolute; inset: 0;
-  pointer-events: none; z-index: 2;
-  mix-blend-mode: multiply;
-  transition: background .4s ease;
-}
-.camera-filter.red { background: rgba(255, 0, 0, .85); }
-.camera-filter.green { background: rgba(0, 255, 0, .85); }
-.camera-filter.blue { background: rgba(0, 0, 255, .85); }
-.camera-filter.off { background: transparent; }
 .camera-scanline {
   position: absolute; inset: 0;
   pointer-events: none; z-index: 3;
   background: repeating-linear-gradient(
     0deg, transparent, transparent 3px,
-    rgba(0,0,0,.08) 3px, rgba(0,0,0,.08) 4px
+    rgba(0,0,0,.06) 3px, rgba(0,0,0,.06) 4px
   );
 }
 .camera-hud {
@@ -629,43 +623,69 @@ html, body {
 .camera-hud .filter-label {
   font-family: var(--font-mono);
   font-size: .5rem; letter-spacing: 2px;
-  padding: 2px 8px; border-radius: 4px;
-  background: rgba(10,10,15,.6);
+  padding: 3px 10px; border-radius: 4px;
+  background: rgba(10,10,15,.7);
+  transition: color .3s;
 }
-.camera-hud .filter-label.active { color: #ff4444; }
-.camera-hud .filter-label.inactive { color: var(--text-dim); }
 .camera-controls {
   display: flex; justify-content: center;
-  gap: 12px; margin-top: 14px;
+  gap: 8px; margin-top: 14px;
+  flex-wrap: wrap;
 }
-.camera-toggle {
-  font-family: var(--font-display);
-  font-size: .6rem; font-weight: 700;
-  letter-spacing: 2px; padding: 12px 24px;
-  border-radius: 10px; cursor: pointer;
-  border: none; transition: all .2s;
-}
-.camera-toggle:active { transform: scale(.95); }
-.camera-toggle.on {
-  background: #cc0000; color: #fff;
-  box-shadow: 0 0 20px rgba(255,0,0,.3);
-}
-.camera-toggle.off {
-  background: var(--bg-card); color: var(--text-dim);
+.cam-filter-btn {
+  font-family: var(--font-mono);
+  font-size: .6rem; font-weight: 600;
+  letter-spacing: 1px; padding: 10px 16px;
+  border-radius: 8px; cursor: pointer;
   border: 1px solid #333;
+  background: var(--bg-card);
+  color: var(--text-dim);
+  transition: all .25s ease;
+  display: flex; align-items: center; gap: 6px;
+  min-width: 54px; justify-content: center;
+}
+.cam-filter-btn:active { transform: scale(.95); }
+.cam-filter-btn .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  transition: box-shadow .3s;
+}
+.cam-filter-btn[data-ch="r"] .dot { background: #ff3333; }
+.cam-filter-btn[data-ch="g"] .dot { background: #33ff66; }
+.cam-filter-btn[data-ch="b"] .dot { background: #3366ff; }
+.cam-filter-btn[data-ch="off"] .dot { background: var(--text-dim); }
+.cam-filter-btn.active {
+  border-color: var(--accent);
+  background: var(--bg-panel);
+  color: var(--text);
+}
+.cam-filter-btn.active[data-ch="r"] {
+  border-color: #ff3333;
+  box-shadow: 0 0 15px rgba(255,50,50,.25);
+  color: #ff6666;
+}
+.cam-filter-btn.active[data-ch="g"] {
+  border-color: #33ff66;
+  box-shadow: 0 0 15px rgba(50,255,100,.2);
+  color: #66ff88;
+}
+.cam-filter-btn.active[data-ch="b"] {
+  border-color: #3366ff;
+  box-shadow: 0 0 15px rgba(50,100,255,.25);
+  color: #6688ff;
 }
 .camera-flip {
   background: var(--bg-card); border: 1px solid #333;
-  color: var(--text-dim); font-size: 1.2rem;
-  width: 44px; height: 44px; border-radius: 10px;
+  color: var(--text-dim); font-size: 1.1rem;
+  width: 42px; height: 42px; border-radius: 8px;
   cursor: pointer; display: flex;
   align-items: center; justify-content: center;
 }
 .camera-flip:active { background: var(--accent-dim); }
 .camera-instructions {
   font-family: var(--font-mono);
-  font-size: .6rem; color: var(--text-dim);
-  margin-top: 12px; line-height: 1.6;
+  font-size: .55rem; color: var(--text-dim);
+  margin-top: 12px; line-height: 1.7;
   letter-spacing: .5px;
 }
 .camera-no-support {
@@ -1846,18 +1866,23 @@ function updateDistanceBar(dist, radius) {
 }
 
 // ═══════════════════════ CAMERA (Red Filter) ═══════════════════════
+// ═══════════════════════ CAMERA (Pixel Processing) ═══════════════════════
+let camAnimFrame = null;
+let camActiveFilter = null; // null | 'r' | 'g' | 'b'
+
 function stopCamera() {
+  if (camAnimFrame) { cancelAnimationFrame(camAnimFrame); camAnimFrame = null; }
   if (cameraStream) {
     cameraStream.getTracks().forEach(t => t.stop());
     cameraStream = null;
   }
+  camActiveFilter = null;
 }
 
 function renderCamera(container, idx) {
   const module = document.createElement('div');
   module.className = 'camera-module';
 
-  // Check camera support
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     module.innerHTML = `
       <div class="camera-no-support">
@@ -1873,43 +1898,53 @@ function renderCamera(container, idx) {
   module.innerHTML = `
     <div class="camera-viewfinder" id="cam-viewfinder">
       <video id="cam-video" autoplay playsinline muted></video>
-      <div class="camera-filter off" id="cam-filter"></div>
+      <canvas id="cam-canvas"></canvas>
       <div class="camera-scanline"></div>
       <div class="camera-hud">
         <div class="rec">REC</div>
-        <div class="filter-label inactive" id="cam-filter-label">FILTRE OFF</div>
+        <div class="filter-label" id="cam-filter-label" style="color:var(--text-dim)">NORMAL</div>
       </div>
     </div>
     <div class="camera-controls">
-      <button class="camera-toggle off" id="cam-toggle" onclick="toggleRedFilter()">
-        🔴
+      <button class="cam-filter-btn active" data-ch="off" onclick="setCamFilter(null)">
+        <span class="dot"></span> OFF
       </button>
-      <button class="camera-toggle off" id="cam-toggle" onclick="toggleGreenFilter()">
-        🟢
+      <button class="cam-filter-btn" data-ch="r" onclick="setCamFilter('r')">
+        <span class="dot"></span> R
       </button>
-      <button class="camera-toggle off" id="cam-toggle" onclick="toggleBlueFilter()">
-        🔵
+      <button class="cam-filter-btn" data-ch="g" onclick="setCamFilter('g')">
+        <span class="dot"></span> G
       </button>
-      <button class="camera-flip" id="cam-flip" onclick="flipCamera()">🔄</button>
+      <button class="cam-filter-btn" data-ch="b" onclick="setCamFilter('b')">
+        <span class="dot"></span> B
+      </button>
+      <button class="camera-flip" onclick="flipCamera()">🔄</button>
     </div>
     <div class="camera-instructions">
-      Activez le filtre rouge puis pointez la caméra<br>
-      vers le document secret pour révéler le message.
+      Sélectionnez un filtre couleur puis pointez la caméra<br>
+      vers le document pour révéler le message caché.
     </div>
   `;
   container.appendChild(module);
 
-  // Start camera (back camera by default)
   window._camFacingMode = 'environment';
+  camActiveFilter = null;
   startCamera();
 
   renderTextInput(container, idx);
 }
 
 function startCamera() {
-  stopCamera();
+  // Stop existing
+  if (camAnimFrame) { cancelAnimationFrame(camAnimFrame); camAnimFrame = null; }
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+
   const video = document.getElementById('cam-video');
-  if (!video) return;
+  const canvas = document.getElementById('cam-canvas');
+  if (!video || !canvas) return;
 
   navigator.mediaDevices.getUserMedia({
     video: { facingMode: window._camFacingMode, width: { ideal: 640 }, height: { ideal: 480 } },
@@ -1919,6 +1954,12 @@ function startCamera() {
     cameraStream = stream;
     video.srcObject = stream;
     video.play().catch(() => {});
+
+    video.onloadedmetadata = () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      processFrame();
+    };
   })
   .catch(err => {
     console.error('Camera error:', err);
@@ -1931,57 +1972,78 @@ function startCamera() {
     `;
   });
 }
-  
-let currentFilter = null;
 
-function setFilter(color, emoji) {
-  const filter = document.getElementById('cam-filter');
-  const toggle = document.getElementById('cam-toggle');
-  const label = document.getElementById('cam-filter-label');
-  if (!filter || !toggle) return;
+function processFrame() {
+  const video = document.getElementById('cam-video');
+  const canvas = document.getElementById('cam-canvas');
+  if (!video || !canvas || !cameraStream) return;
 
-  const isSame = currentFilter === color;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-  // 🔧 IMPORTANT : on enlève seulement les filtres couleur
-  filter.classList.remove('red', 'green', 'blue', 'off');
-  toggle.classList.remove('on', 'off');
+  function draw() {
+    if (!cameraStream) return;
 
-  if (isSame) {
-    // OFF
-    currentFilter = null;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    filter.classList.add('off');
-    toggle.classList.add('off');
-    toggle.innerHTML = emoji;
+    if (camActiveFilter) {
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = imageData.data;
 
-    label.className = 'filter-label inactive';
-    label.textContent = 'FILTRE OFF';
-  } else {
-    // ON
-    currentFilter = color;
+      // Pixel processing: isolate the selected channel
+      // This simulates looking through a colored filter:
+      // - Red filter: only red channel → blue/green text disappears, red text blends
+      // - Blue filter: only blue channel → red text disappears, blue text blends
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i+1], b = d[i+2];
 
-    filter.classList.add(color);
-    toggle.classList.add('on');
-    toggle.innerHTML = '⬤';
+        if (camActiveFilter === 'r') {
+          // Isolate red: show red channel as grayscale, suppress blue/green
+          // Text printed in blue will appear dark, red text blends into bright
+          d[i]   = r;          // keep red
+          d[i+1] = r * 0.15;   // suppress green, slight tint
+          d[i+2] = r * 0.1;    // suppress blue
+        } else if (camActiveFilter === 'g') {
+          d[i]   = g * 0.15;
+          d[i+1] = g;
+          d[i+2] = g * 0.1;
+        } else if (camActiveFilter === 'b') {
+          // Isolate blue: show blue channel as grayscale, suppress red/green
+          // Text printed in red will appear dark, blue text blends into bright
+          d[i]   = b * 0.1;
+          d[i+1] = b * 0.15;
+          d[i+2] = b;
+        }
+      }
 
-    label.className = 'filter-label active';
-    label.textContent = '■ FILTRE';
+      ctx.putImageData(imageData, 0, 0);
+    }
 
-    playTone(600, .1);
+    camAnimFrame = requestAnimationFrame(draw);
   }
+
+  draw();
 }
 
-// === EXACTEMENT comme ton API initiale ===
-window.toggleRedFilter = function() {
-  setFilter('red', '🔴');
-};
+window.setCamFilter = function(ch) {
+  camActiveFilter = ch;
+  const label = document.getElementById('cam-filter-label');
 
-window.toggleGreenFilter = function() {
-  setFilter('green', '🟢');
-};
+  // Update all buttons
+  document.querySelectorAll('.cam-filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.ch === (ch || 'off'));
+  });
 
-window.toggleBlueFilter = function() {
-  setFilter('blue', '🔵');
+  // Update HUD label
+  if (!ch) {
+    label.textContent = 'NORMAL';
+    label.style.color = 'var(--text-dim)';
+  } else {
+    const names = { r: 'ROUGE', g: 'VERT', b: 'BLEU' };
+    const colors = { r: '#ff4444', g: '#44ff66', b: '#4466ff' };
+    label.textContent = '■ FILTRE ' + names[ch];
+    label.style.color = colors[ch];
+    playTone(600, .1);
+  }
 };
 
 window.flipCamera = function() {
