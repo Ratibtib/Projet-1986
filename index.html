@@ -573,6 +573,108 @@ html, body {
   display: none;
 }
 
+/* ═══════════ CAMERA RED FILTER ═══════════ */
+.camera-module { text-align: center; }
+.camera-viewfinder {
+  position: relative;
+  width: 100%; max-width: 340px;
+  height: 320px;
+  margin: 0 auto;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid var(--accent-dim);
+  background: #000;
+}
+.camera-viewfinder video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.camera-filter {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 2;
+  mix-blend-mode: multiply;
+  transition: background .4s ease;
+}
+.camera-filter.red { background: rgba(255, 0, 0, .85); }
+.camera-filter.off { background: transparent; }
+.camera-scanline {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 3;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 3px,
+    rgba(0,0,0,.08) 3px, rgba(0,0,0,.08) 4px
+  );
+}
+.camera-hud {
+  position: absolute; top: 0; left: 0; right: 0;
+  padding: 10px 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  z-index: 4; pointer-events: none;
+}
+.camera-hud .rec {
+  font-family: var(--font-mono);
+  font-size: .5rem; color: var(--warn);
+  letter-spacing: 2px;
+  display: flex; align-items: center; gap: 6px;
+  animation: pulse 1.5s infinite;
+}
+.camera-hud .rec::before {
+  content: '';
+  width: 8px; height: 8px;
+  background: var(--warn);
+  border-radius: 50%;
+}
+.camera-hud .filter-label {
+  font-family: var(--font-mono);
+  font-size: .5rem; letter-spacing: 2px;
+  padding: 2px 8px; border-radius: 4px;
+  background: rgba(10,10,15,.6);
+}
+.camera-hud .filter-label.active { color: #ff4444; }
+.camera-hud .filter-label.inactive { color: var(--text-dim); }
+.camera-controls {
+  display: flex; justify-content: center;
+  gap: 12px; margin-top: 14px;
+}
+.camera-toggle {
+  font-family: var(--font-display);
+  font-size: .6rem; font-weight: 700;
+  letter-spacing: 2px; padding: 12px 24px;
+  border-radius: 10px; cursor: pointer;
+  border: none; transition: all .2s;
+}
+.camera-toggle:active { transform: scale(.95); }
+.camera-toggle.on {
+  background: #cc0000; color: #fff;
+  box-shadow: 0 0 20px rgba(255,0,0,.3);
+}
+.camera-toggle.off {
+  background: var(--bg-card); color: var(--text-dim);
+  border: 1px solid #333;
+}
+.camera-flip {
+  background: var(--bg-card); border: 1px solid #333;
+  color: var(--text-dim); font-size: 1.2rem;
+  width: 44px; height: 44px; border-radius: 10px;
+  cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+}
+.camera-flip:active { background: var(--accent-dim); }
+.camera-instructions {
+  font-family: var(--font-mono);
+  font-size: .6rem; color: var(--text-dim);
+  margin-top: 12px; line-height: 1.6;
+  letter-spacing: .5px;
+}
+.camera-no-support {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 200px; gap: 12px;
+  font-family: var(--font-mono);
+  font-size: .7rem; color: var(--warn);
+  text-align: center; line-height: 1.6;
+}
+
 /* ═══════════ AUDIO ═══════════ */
 .audio-player { background: var(--bg-card); border-radius: 16px; padding: 24px; text-align: center; }
 .audio-wave { display: flex; align-items: center; justify-content: center; gap: 3px; height: 60px; margin-bottom: 16px; }
@@ -798,7 +900,7 @@ html, body {
 
 <script>
 // ═══════════════════════ CONFIGURATION ═══════════════════════
-const ACT_BOUNDARIES = [0, 4, 8, 12, 17]; // indices where each act starts, last = total
+const ACT_BOUNDARIES = [0, 4, 8, 12, 18]; // indices where each act starts, last = total
 const ACTS = [
   { name: "INITIALISATION", subtitle: "Vérification d'identité" },
   { name: "CALIBRATION", subtitle: "Tests cognitifs" },
@@ -857,7 +959,7 @@ const ENIGMAS = [
     id: 6, type: "Position GPS", format: "gps",
     narrative: "MODULE GPS > Signal crypté détecté. Déplacement physique requis pour décoder.",
     question: "Un signal a été localisé. Déplacez-vous jusqu'à la zone cible pour décrypter le message secret.",
-    gpsTarget: { lat: 48.107773, lng: -1.677835 },
+    gpsTarget: { lat: 48.11404, lng: -1.65848 },
     gpsRadius: 500,
     gpsSecret: "OMBRE",
     answer: ["ombre", "l'ombre"],
@@ -948,7 +1050,15 @@ const ENIGMAS = [
     title: "La Faim"
   },
   {
-    id: 17, type: "Puzzle Final", format: "puzzle",
+    id: 17, type: "Vision Secrète", format: "camera",
+    narrative: "MODULE OPTIQUE > Un message a été dissimulé sur un document physique. Seul un filtre spécial peut le révéler.",
+    question: "Un agent a caché un message sur un document imprimé.\n\nActivez le filtre rouge de votre caméra, puis pointez-la vers le document pour lire le mot secret.",
+    answer: ["cadeau", "le cadeau"],
+    hint: "Regardez bien à travers le filtre rouge... le texte bleu disparaît, le message caché apparaît !",
+    title: "L'Œil Rouge"
+  },
+  {
+    id: 18, type: "Puzzle Final", format: "puzzle",
     narrative: "SÉQUENCE FINALE > Reconstituez l'image pour déverrouiller la récompense.",
     question: "Remettez les pièces dans l'ordre pour révéler le message final.\n\nAppuyez sur une pièce adjacente à l'espace vide pour la déplacer.",
     answer: ["ok"],
@@ -976,6 +1086,7 @@ function saveState() {
 // ═══════════════════════ AUDIO ═══════════════════════
 let audioCtx = null;
 let gpsWatchId = null;
+let cameraStream = null;
 function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
 function playTone(freq, dur, type='sine') {
   try {
@@ -1051,6 +1162,8 @@ function showHub() {
   }
   // Cleanup Leaflet map
   cleanupGPSMap();
+  // Cleanup camera
+  stopCamera();
   showScreen('hub-screen');
   renderHub();
 }
@@ -1205,6 +1318,7 @@ function renderEnigmaScreen(idx) {
     case 'gps': renderGPS(body, idx); break;
     case 'nfc': renderNFC(body, idx); break;
     case 'keypad': renderKeypad(body, idx); break;
+    case 'camera': renderCamera(body, idx); break;
     case 'puzzle': renderPuzzle(body, idx); break;
   }
 }
@@ -1316,9 +1430,6 @@ function renderAudioPlayer(container, idx) {
       <button class="speed-btn" onclick="setSpeed(1.5)">×1.5</button>
     </div>
     <div class="audio-status" id="audio-status">PRÊT — APPUYEZ SUR ▶</div>
-    <div class="audio-download" style="margin-top:8px">
-    <a href="https://1drv.ms/u/c/c5a2a521a2670743/IQBikpQfjRRaQ4iGv2pte795Aev7GRtGaeW71MKyULa_1YY?e=aN68pJ" download>Télécharger le fichier</a>
-  </div>
   `;
   container.appendChild(player);
   renderTextInput(container, idx);
@@ -1728,6 +1839,116 @@ function updateDistanceBar(dist, radius) {
   }
 }
 
+// ═══════════════════════ CAMERA (Red Filter) ═══════════════════════
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+}
+
+function renderCamera(container, idx) {
+  const module = document.createElement('div');
+  module.className = 'camera-module';
+
+  // Check camera support
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    module.innerHTML = `
+      <div class="camera-no-support">
+        📷<br>Caméra non supportée sur ce navigateur.<br>
+        Essayez avec Chrome sur mobile.
+      </div>
+    `;
+    container.appendChild(module);
+    renderTextInput(container, idx);
+    return;
+  }
+
+  module.innerHTML = `
+    <div class="camera-viewfinder" id="cam-viewfinder">
+      <video id="cam-video" autoplay playsinline muted></video>
+      <div class="camera-filter off" id="cam-filter"></div>
+      <div class="camera-scanline"></div>
+      <div class="camera-hud">
+        <div class="rec">REC</div>
+        <div class="filter-label inactive" id="cam-filter-label">FILTRE OFF</div>
+      </div>
+    </div>
+    <div class="camera-controls">
+      <button class="camera-toggle off" id="cam-toggle" onclick="toggleRedFilter()">
+        🔴 FILTRE ROUGE
+      </button>
+      <button class="camera-flip" id="cam-flip" onclick="flipCamera()">🔄</button>
+    </div>
+    <div class="camera-instructions">
+      Activez le filtre rouge puis pointez la caméra<br>
+      vers le document secret pour révéler le message.
+    </div>
+  `;
+  container.appendChild(module);
+
+  // Start camera (back camera by default)
+  window._camFacingMode = 'environment';
+  startCamera();
+
+  renderTextInput(container, idx);
+}
+
+function startCamera() {
+  stopCamera();
+  const video = document.getElementById('cam-video');
+  if (!video) return;
+
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: window._camFacingMode, width: { ideal: 640 }, height: { ideal: 480 } },
+    audio: false
+  })
+  .then(stream => {
+    cameraStream = stream;
+    video.srcObject = stream;
+    video.play().catch(() => {});
+  })
+  .catch(err => {
+    console.error('Camera error:', err);
+    const vf = document.getElementById('cam-viewfinder');
+    if (vf) vf.innerHTML = `
+      <div class="camera-no-support">
+        📷<br>Impossible d'accéder à la caméra.<br>
+        ${err.name === 'NotAllowedError' ? 'Autorisez l\'accès caméra dans les paramètres.' : 'Erreur : ' + err.message}
+      </div>
+    `;
+  });
+}
+
+window.toggleRedFilter = function() {
+  const filter = document.getElementById('cam-filter');
+  const toggle = document.getElementById('cam-toggle');
+  const label = document.getElementById('cam-filter-label');
+  if (!filter || !toggle) return;
+
+  const isOn = filter.classList.contains('red');
+  if (isOn) {
+    filter.className = 'camera-filter off';
+    toggle.className = 'camera-toggle off';
+    toggle.innerHTML = '🔴 FILTRE ROUGE';
+    label.className = 'filter-label inactive';
+    label.textContent = 'FILTRE OFF';
+  } else {
+    filter.className = 'camera-filter red';
+    toggle.className = 'camera-toggle on';
+    toggle.innerHTML = '⬤ FILTRE ACTIF';
+    label.className = 'filter-label active';
+    label.textContent = '■ FILTRE RED';
+    playTone(600, .1);
+  }
+};
+
+window.flipCamera = function() {
+  window._camFacingMode = window._camFacingMode === 'environment' ? 'user' : 'environment';
+  startCamera();
+  playBeep();
+};
+
 // ═══════════════════════ NFC ═══════════════════════
 function renderNFC(container, idx) {
   const zone = document.createElement('div');
@@ -1839,6 +2060,8 @@ function solveEnigma(idx) {
   try { document.getElementById('fouras-audio').pause(); } catch(e) {}
   // Stop GPS tracking if active
   if (gpsWatchId !== null) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
+  // Stop camera if active
+  stopCamera();
 
   if (STATE.solved.length >= TOTAL) {
     setTimeout(() => showScreen('victory-screen'), 500);
