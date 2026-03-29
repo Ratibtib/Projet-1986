@@ -1877,9 +1877,9 @@ function renderCamera(container, idx) {
       </div>
     </div>
     <div class="camera-controls">
-      <button class="camera-toggle off filter-btn" onclick="toggleFilter('red', this, '🔴')">🔴</button>
-<button class="camera-toggle off filter-btn" onclick="toggleFilter('green', this, '🟢')">🟢</button>
-<button class="camera-toggle off filter-btn" onclick="toggleFilter('blue', this, '🔵')">🔵</button>
+      <button class="camera-toggle off filter-btn" data-emoji="🔴" onclick="toggleFilter('red', this, '🔴')">🔴</button>
+      <button class="camera-toggle off filter-btn" data-emoji="🟢" onclick="toggleFilter('green', this, '🟢')">🟢</button>
+      <button class="camera-toggle off filter-btn" data-emoji="🔵" onclick="toggleFilter('blue', this, '🔵')">🔵</button>
       <button class="camera-flip" id="cam-flip" onclick="flipCamera()">🔄</button>
     </div>
     <div class="camera-instructions">
@@ -1936,10 +1936,10 @@ function toggleFilter(color, btn, emoji) {
 
   // reset TOUS les boutons
   document.querySelectorAll('.filter-btn').forEach(b => {
-    b.classList.remove('on');
-    b.classList.add('off');
-    b.innerHTML = b.getAttribute('data-emoji') || b.innerHTML;
-  });
+  b.classList.remove('on');
+  b.classList.add('off');
+  b.innerHTML = b.dataset.emoji;
+});
 
   if (isSame) {
     // OFF
