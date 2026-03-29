@@ -1927,75 +1927,40 @@ function startCamera() {
     `;
   });
 }
-
-window.toggleRedFilter = function() {
+function toggleFilter(color, emoji) {
   const filter = document.getElementById('cam-filter');
   const toggle = document.getElementById('cam-toggle');
   const label = document.getElementById('cam-filter-label');
   if (!filter || !toggle) return;
 
-  const isOn = filter.classList.contains('red');
+  const isOn = filter.classList.contains(color);
+
+  // RESET complet (évite les conflits)
+  filter.className = 'camera-filter';
+  toggle.className = 'camera-toggle';
+  
   if (isOn) {
-    filter.className = 'camera-filter off';
-    toggle.className = 'camera-toggle off';
-    toggle.innerHTML = '🔴 FILTRE ROUGE';
+    // OFF
+    filter.classList.add('off');
+    toggle.classList.add('off');
+    toggle.innerHTML = emoji;
     label.className = 'filter-label inactive';
     label.textContent = 'FILTRE OFF';
   } else {
-    filter.className = 'camera-filter red';
-    toggle.className = 'camera-toggle on';
+    // ON
+    filter.classList.add(color);
+    toggle.classList.add('on');
     toggle.innerHTML = '⬤';
     label.className = 'filter-label active';
     label.textContent = '■ FILTRE';
     playTone(600, .1);
   }
-};
+}
 
-window.toggleGreenFilter = function() {
-  const filter = document.getElementById('cam-filter');
-  const toggle = document.getElementById('cam-toggle');
-  const label = document.getElementById('cam-filter-label');
-  if (!filter || !toggle) return;
-
-  const isOn = filter.classList.contains('green');
-  if (isOn) {
-    filter.className = 'camera-filter off';
-    toggle.className = 'camera-toggle off';
-    toggle.innerHTML = '🟢';
-    label.className = 'filter-label inactive';
-    label.textContent = 'FILTRE OFF';
-  } else {
-    filter.className = 'camera-filter green';
-    toggle.className = 'camera-toggle on';
-    toggle.innerHTML = '⬤';
-    label.className = 'filter-label active';
-    label.textContent = '■ FILTRE';
-    playTone(600, .1);
-  }
-};
-
-window.toggleBlueFilter = function() {
-  const filter = document.getElementById('cam-filter');
-  const toggle = document.getElementById('cam-toggle');
-  const label = document.getElementById('cam-filter-label');
-  if (!filter || !toggle) return;
-
-  const isOn = filter.classList.contains('blue');
-  if (isOn) {
-    filter.className = 'camera-filter off';
-    toggle.className = 'camera-toggle off';
-    toggle.innerHTML = '🔵';
-    label.className = 'filter-label inactive';
-    label.textContent = 'FILTRE OFF';
-  } else {
-    filter.className = 'camera-filter blue';
-    toggle.className = 'camera-toggle on';
-    toggle.innerHTML = '⬤';
-    label.className = 'filter-label active';
-    label.textContent = '■ FILTRE';
-    playTone(600, .1);
-  }
-};
+// Wrappers propres
+window.toggleRedFilter = () => toggleFilter('red', '🔴');
+window.toggleGreenFilter = () => toggleFilter('green', '🟢');
+window.toggleBlueFilter = () => toggleFilter('blue', '🔵');
 
 window.flipCamera = function() {
   window._camFacingMode = window._camFacingMode === 'environment' ? 'user' : 'environment';
