@@ -595,47 +595,9 @@ html, body {
   mix-blend-mode: multiply;
   transition: background .4s ease;
 }
-  
-const r = pixel.r;
-const g = pixel.g;
-const b = pixel.b;
-const value = r - (g + b) / 2;
-
-function applyColorFilter(imageData, mode = 'red') {
-  const data = imageData.data;
-  const len = data.length;
-
-  for (let i = 0; i < len; i += 4) {
-    const r = data[i];
-    const g = data[i + 1];
-    const b = data[i + 2];
-
-    let score;
-    switch (mode) {
-      case 'red':
-        score = r - Math.max(g, b);
-        break;
-      case 'green':
-        score = g - Math.max(r, b);
-        break;
-      case 'blue':
-        score = b - Math.max(r, g);
-        break;
-      default:
-        score = 0;
-    }
-
-    const threshold = 50; // ajuste selon l'image
-    const value = score > threshold ? 255 : 0;
-
-    data[i] = value;       // R
-    data[i + 1] = value;   // G
-    data[i + 2] = value;   // B
-  }
-
-  return imageData;
-}
-  
+.camera-filter.red { background: rgba(0, 255, 255, .85); }
+.camera-filter.green { background: rgba(255, 0, 255, .85); }
+.camera-filter.blue { background: rgba(255, 255, 0, .85); }
 .camera-filter.off { background: transparent; }
 .camera-scanline {
   position: absolute; inset: 0;
@@ -1879,12 +1841,7 @@ function updateDistanceBar(dist, radius) {
   }
 }
 
-// ═══════════════════════ CAMERA MODULE COMPLETE ═══════════════════════
-let cameraStream = null;
-let currentFilter = null;
-let canvas, ctx;
-
-// Arrêter la caméra
+// ═══════════════════════ CAMERA (Red Filter) ═══════════════════════
 function stopCamera() {
   if (cameraStream) {
     cameraStream.getTracks().forEach(t => t.stop());
@@ -1892,139 +1849,11 @@ function stopCamera() {
   }
 }
 
-// Initialiser le canvas pour le traitement vidéo
-function initCanvas(video) {
-  canvas = document.createElement('canvas');
-  ctx = canvas.getContext('2d');
-  canvas.width = video.videoWidth || 640;
-  canvas.height = video.videoHeight || 480;
-  canvas.style.position = 'absolute';
-  canvas.style.top = '0';
-  canvas.style.left = '0';
-  canvas.style.width = '100%';
-  canvas.style.height = '100%';
-  canvas.style.zIndex = '1'; // sous HUD
-  const viewfinder = document.getElementById('cam-viewfinder');
-  if (viewfinder) viewfinder.appendChild(canvas);
-}
-
-// Boucle de traitement vidéo
-function processFrame() {
-  const video = document.getElementById('cam-video');
-  if (!video || video.readyState < 2 || !canvas) {
-    requestAnimationFrame(processFrame);
-    return;
-  }
-
-  // Adapter canvas à la taille réelle
-  if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-  }
-
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  let frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  if (currentFilter) {
-    frame = applyColorFilter(frame, currentFilter);
-  }
-  ctx.putImageData(frame, 0, 0);
-
-  requestAnimationFrame(processFrame);
-}
-
-// Fonction de filtre couleur pro
-function applyColorFilter(imageData, mode = 'red') {
-  const data = imageData.data;
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i];
-    const g = data[i + 1];
-    const b = data[i + 2];
-
-    let score = 0;
-    switch (mode) {
-      case 'red': score = r - Math.max(g, b); break;
-      case 'green': score = g - Math.max(r, b); break;
-      case 'blue': score = b - Math.max(r, g); break;
-    }
-
-    const threshold = 50; // ajustable selon luminosité
-    const value = score > threshold ? 255 : 0;
-    data[i] = data[i + 1] = data[i + 2] = value;
-  }
-  return imageData;
-}
-
-// Démarrage de la caméra
-function startCamera() {
-  stopCamera();
-  const video = document.getElementById('cam-video');
-  if (!video) return;
-
-  navigator.mediaDevices.getUserMedia({
-    video: { facingMode: window._camFacingMode, width: { ideal: 640 }, height: { ideal: 480 } },
-    audio: false
-  })
-  .then(stream => {
-    cameraStream = stream;
-    video.srcObject = stream;
-    video.play().catch(() => {});
-
-    video.onloadedmetadata = () => {
-      initCanvas(video);
-      processFrame();
-    };
-  })
-  .catch(err => {
-    console.error('Camera error:', err);
-    const vf = document.getElementById('cam-viewfinder');
-    if (vf) vf.innerHTML = `
-      <div class="camera-no-support">
-        📷<br>Impossible d'accéder à la caméra.<br>
-        ${err.name === 'NotAllowedError' ? 'Autorisez l\'accès caméra dans les paramètres.' : 'Erreur : ' + err.message}
-      </div>
-    `;
-  });
-}
-
-// Toggle filtre rouge/vert/bleu
-function toggleFilter(color, btn, emoji) {
-  const label = document.getElementById('cam-filter-label');
-  if (!label) return;
-
-  const isSame = currentFilter === color;
-
-  // Reset tous les boutons
-  document.querySelectorAll('.filter-btn').forEach(b => {
-    b.classList.remove('on');
-    b.classList.add('off');
-    b.innerHTML = b.dataset.emoji;
-  });
-
-  if (isSame) {
-    currentFilter = null;
-    label.className = 'filter-label inactive';
-    label.textContent = 'FILTRE OFF';
-  } else {
-    currentFilter = color;
-    btn.classList.remove('off');
-    btn.classList.add('on');
-    btn.innerHTML = '⬤';
-    label.className = 'filter-label active';
-    label.textContent = '■ FILTRE';
-  }
-}
-
-// Flip caméra avant/arrière
-window.flipCamera = function() {
-  window._camFacingMode = window._camFacingMode === 'environment' ? 'user' : 'environment';
-  startCamera();
-}
-
-// Render module caméra complet
 function renderCamera(container, idx) {
   const module = document.createElement('div');
   module.className = 'camera-module';
 
+  // Check camera support
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     module.innerHTML = `
       <div class="camera-no-support">
@@ -2033,12 +1862,15 @@ function renderCamera(container, idx) {
       </div>
     `;
     container.appendChild(module);
+    renderTextInput(container, idx);
     return;
   }
 
   module.innerHTML = `
     <div class="camera-viewfinder" id="cam-viewfinder">
       <video id="cam-video" autoplay playsinline muted></video>
+      <div class="camera-filter off" id="cam-filter"></div>
+      <div class="camera-scanline"></div>
       <div class="camera-hud">
         <div class="rec">REC</div>
         <div class="filter-label inactive" id="cam-filter-label">FILTRE OFF</div>
@@ -2057,11 +1889,89 @@ function renderCamera(container, idx) {
   `;
   container.appendChild(module);
 
+  // Start camera (back camera by default)
   window._camFacingMode = 'environment';
   startCamera();
+
+  renderTextInput(container, idx);
 }
 
+function startCamera() {
+  stopCamera();
+  const video = document.getElementById('cam-video');
+  if (!video) return;
+
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: window._camFacingMode, width: { ideal: 640 }, height: { ideal: 480 } },
+    audio: false
+  })
+  .then(stream => {
+    cameraStream = stream;
+    video.srcObject = stream;
+    video.play().catch(() => {});
+  })
+  .catch(err => {
+    console.error('Camera error:', err);
+    const vf = document.getElementById('cam-viewfinder');
+    if (vf) vf.innerHTML = `
+      <div class="camera-no-support">
+        📷<br>Impossible d'accéder à la caméra.<br>
+        ${err.name === 'NotAllowedError' ? 'Autorisez l\'accès caméra dans les paramètres.' : 'Erreur : ' + err.message}
+      </div>
+    `;
+  });
+}
   
+let currentFilter = null;
+
+function toggleFilter(color, btn, emoji) {
+  const filter = document.getElementById('cam-filter');
+  const label = document.getElementById('cam-filter-label');
+  if (!filter) return;
+
+  const isSame = currentFilter === color;
+
+  // reset filtre visuel
+  filter.classList.remove('red', 'green', 'blue', 'off');
+
+  // reset TOUS les boutons
+  document.querySelectorAll('.filter-btn').forEach(b => {
+  b.classList.remove('on');
+  b.classList.add('off');
+  b.innerHTML = b.dataset.emoji;
+});
+
+  if (isSame) {
+    // OFF
+    currentFilter = null;
+    filter.classList.add('off');
+
+    btn.innerHTML = emoji;
+
+    label.className = 'filter-label inactive';
+    label.textContent = 'FILTRE OFF';
+
+  } else {
+    // ON
+    currentFilter = color;
+    filter.classList.add(color);
+
+    btn.classList.remove('off');
+    btn.classList.add('on');
+    btn.innerHTML = '⬤';
+
+    label.className = 'filter-label active';
+    label.textContent = '■ FILTRE';
+
+    playTone(600, .1);
+  }
+}
+
+window.flipCamera = function() {
+  window._camFacingMode = window._camFacingMode === 'environment' ? 'user' : 'environment';
+  startCamera();
+  playBeep();
+};
 
 // ═══════════════════════ NFC ═══════════════════════
 function renderNFC(container, idx) {
