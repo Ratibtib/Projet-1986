@@ -1083,6 +1083,7 @@ const ENIGMAS = [
   {
     id: 18, type: "Labyrinthe", format: "text",
     narrative: "MODULE calcul > Un code a été dissimulé sur un document physique. Seul le chemin du labyrinthe peut le révéler.",
+    image : "icons/labyrinthe_opp_c.png",
     question: "",
     answer: ["FY57X?N3PML90R6ID"],
     hint: "F----[...]----D",
@@ -1100,6 +1101,8 @@ const ENIGMAS = [
 
 const TOTAL = ENIGMAS.length;
 
+
+  
 // ═══════════════════════ STATE ═══════════════════════
 let STATE = loadState();
 
@@ -1310,6 +1313,15 @@ function renderEnigmaScreen(idx) {
     q.textContent = e.question;
     body.appendChild(q);
   }
+
+  // Image
+if (e.image) {
+  const img = document.createElement("img");
+  img.src = e.image;
+  img.style.maxWidth = "100%";
+  img.style.margin = "16px 0";
+  body.appendChild(img);
+}
 
   // If already solved, show solved state
   if (isSolved) {
