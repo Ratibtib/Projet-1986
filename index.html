@@ -1946,7 +1946,7 @@ window.toggleRedFilter = function() {
     toggle.className = 'camera-toggle on';
     toggle.innerHTML = '⬤ FILTRE ACTIF';
     label.className = 'filter-label active';
-    label.textContent = '■ FILTRE RED';
+    label.textContent = '■ FILTRE';
     playTone(600, .1);
   }
 };
@@ -1967,9 +1967,9 @@ window.toggleGreenFilter = function() {
   } else {
     filter.className = 'camera-filter green';
     toggle.className = 'camera-toggle on';
-    toggle.innerHTML = '⬤ FILTRE ACTIF';
+    toggle.innerHTML = '⬤';
     label.className = 'filter-label active';
-    label.textContent = '■ FILTRE RED';
+    label.textContent = '■ FILTRE';
     playTone(600, .1);
   }
 };
@@ -1988,11 +1988,11 @@ window.toggleBlueFilter = function() {
     label.className = 'filter-label inactive';
     label.textContent = 'FILTRE OFF';
   } else {
-    filter.className = 'camera-filter red';
+    filter.className = 'camera-filter blue';
     toggle.className = 'camera-toggle on';
-    toggle.innerHTML = '⬤ FILTRE ACTIF';
+    toggle.innerHTML = '⬤';
     label.className = 'filter-label active';
-    label.textContent = '■ FILTRE RED';
+    label.textContent = '■';
     playTone(600, .1);
   }
 };
