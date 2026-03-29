@@ -923,7 +923,7 @@ html, body {
 
 <script>
 // ═══════════════════════ CONFIGURATION ═══════════════════════
-const ACT_BOUNDARIES = [0, 4, 8, 12, 19]; // indices where each act starts, last = total
+const ACT_BOUNDARIES = [0, 4, 8, 12, 40]; // indices where each act starts, last = total
 const ACTS = [
   { name: "INITIALISATION", subtitle: "Vérification d'identité" },
   { name: "CALIBRATION", subtitle: "Tests cognitifs" },
@@ -1090,7 +1090,15 @@ const ENIGMAS = [
     title: "La caltoch"
   },
   {
-    id: 19, type: "Puzzle Final", format: "puzzle",
+    id: 19, type: "0101", format: "text",
+    narrative: "MODULE si > Un code a été dissimulé sur sauras-tu le révéler.",
+    question: "01001110 10111000 10101001 10010101 11101011 00011010 10111010 ",
+    answer: ["triple saut"],
+    hint: "3 fois tu voleras",
+    title: "La machine"
+  },
+  {
+    id: 40, type: "Puzzle Final", format: "puzzle",
     narrative: "SÉQUENCE FINALE > Reconstituez l'image pour déverrouiller la récompense.",
     question: "Remettez les pièces dans l'ordre pour révéler le message final.\n\nAppuyez sur une pièce adjacente à l'espace vide pour la déplacer.",
     answer: ["ok"],
