@@ -595,9 +595,9 @@ html, body {
   mix-blend-mode: multiply;
   transition: background .4s ease;
 }
-.camera-filter.red { background: rgba(0, 255, 255, .85); }
-.camera-filter.green { background: rgba(255, 0, 255, .85); }
-.camera-filter.blue { background: rgba(255, 255, 0, .85); }
+.camera-filter.red { background: rgba(255, 0, 0, .85); }
+.camera-filter.green { background: rgba(0, 255, 0, .85); }
+.camera-filter.blue { background: rgba(0, 0, 255, .85); }
 .camera-filter.off { background: transparent; }
 .camera-scanline {
   position: absolute; inset: 0;
@@ -1877,9 +1877,15 @@ function renderCamera(container, idx) {
       </div>
     </div>
     <div class="camera-controls">
-      <button class="camera-toggle off filter-btn" data-emoji="🔴" onclick="toggleFilter('red', this, '🔴')">🔴</button>
-      <button class="camera-toggle off filter-btn" data-emoji="🟢" onclick="toggleFilter('green', this, '🟢')">🟢</button>
-      <button class="camera-toggle off filter-btn" data-emoji="🔵" onclick="toggleFilter('blue', this, '🔵')">🔵</button>
+      <button class="camera-toggle off" id="cam-toggle" onclick="toggleRedFilter()">
+        🔴
+      </button>
+      <button class="camera-toggle off" id="cam-toggle" onclick="toggleGreenFilter()">
+        🟢
+      </button>
+      <button class="camera-toggle off" id="cam-toggle" onclick="toggleBlueFilter()">
+        🔵
+      </button>
       <button class="camera-flip" id="cam-flip" onclick="flipCamera()">🔄</button>
     </div>
     <div class="camera-instructions">
@@ -1924,41 +1930,35 @@ function startCamera() {
   
 let currentFilter = null;
 
-function toggleFilter(color, btn, emoji) {
+function setFilter(color, emoji) {
   const filter = document.getElementById('cam-filter');
+  const toggle = document.getElementById('cam-toggle');
   const label = document.getElementById('cam-filter-label');
-  if (!filter) return;
+  if (!filter || !toggle) return;
 
   const isSame = currentFilter === color;
 
-  // reset filtre visuel
+  // 🔧 IMPORTANT : on enlève seulement les filtres couleur
   filter.classList.remove('red', 'green', 'blue', 'off');
-
-  // reset TOUS les boutons
-  document.querySelectorAll('.filter-btn').forEach(b => {
-  b.classList.remove('on');
-  b.classList.add('off');
-  b.innerHTML = b.dataset.emoji;
-});
+  toggle.classList.remove('on', 'off');
 
   if (isSame) {
     // OFF
     currentFilter = null;
-    filter.classList.add('off');
 
-    btn.innerHTML = emoji;
+    filter.classList.add('off');
+    toggle.classList.add('off');
+    toggle.innerHTML = emoji;
 
     label.className = 'filter-label inactive';
     label.textContent = 'FILTRE OFF';
-
   } else {
     // ON
     currentFilter = color;
-    filter.classList.add(color);
 
-    btn.classList.remove('off');
-    btn.classList.add('on');
-    btn.innerHTML = '⬤';
+    filter.classList.add(color);
+    toggle.classList.add('on');
+    toggle.innerHTML = '⬤';
 
     label.className = 'filter-label active';
     label.textContent = '■ FILTRE';
@@ -1966,6 +1966,19 @@ function toggleFilter(color, btn, emoji) {
     playTone(600, .1);
   }
 }
+
+// === EXACTEMENT comme ton API initiale ===
+window.toggleRedFilter = function() {
+  setFilter('red', '🔴');
+};
+
+window.toggleGreenFilter = function() {
+  setFilter('green', '🟢');
+};
+
+window.toggleBlueFilter = function() {
+  setFilter('blue', '🔵');
+};
 
 window.flipCamera = function() {
   window._camFacingMode = window._camFacingMode === 'environment' ? 'user' : 'environment';
