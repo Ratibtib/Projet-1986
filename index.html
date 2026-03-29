@@ -595,19 +595,45 @@ html, body {
   mix-blend-mode: multiply;
   transition: background .4s ease;
 }
-.camera-filter.red {
-  backdrop-filter: grayscale(1) contrast(2) brightness(1.2);
-  background: rgba(255,0,0,0.2);
-}
+  
+const r = pixel.r;
+const g = pixel.g;
+const b = pixel.b;
+const value = r - (g + b) / 2;
 
-.camera-filter.green {
-  backdrop-filter: grayscale(1) contrast(2) brightness(1.2);
-  background: rgba(0,255,0,0.2);
-}
+function applyColorFilter(imageData, mode = 'red') {
+  const data = imageData.data;
+  const len = data.length;
 
-.camera-filter.blue {
-  backdrop-filter: grayscale(1) contrast(2) brightness(1.2);
-  background: rgba(0,0,255,0.2);
+  for (let i = 0; i < len; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+
+    let score;
+    switch (mode) {
+      case 'red':
+        score = r - Math.max(g, b);
+        break;
+      case 'green':
+        score = g - Math.max(r, b);
+        break;
+      case 'blue':
+        score = b - Math.max(r, g);
+        break;
+      default:
+        score = 0;
+    }
+
+    const threshold = 50; // ajuste selon l'image
+    const value = score > threshold ? 255 : 0;
+
+    data[i] = value;       // R
+    data[i + 1] = value;   // G
+    data[i + 2] = value;   // B
+  }
+
+  return imageData;
 }
   
 .camera-filter.off { background: transparent; }
@@ -1983,7 +2009,22 @@ window.flipCamera = function() {
   window._camFacingMode = window._camFacingMode === 'environment' ? 'user' : 'environment';
   startCamera();
   playBeep();
-};
+}
+const canvas = document.createElement('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = video.videoWidth;
+canvas.height = video.videoHeight;
+document.body.appendChild(canvas); // ou ajoute-le dans ton module caméra
+
+function processFrame() {
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  let frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  frame = applyColorFilter(frame, currentMode); // 'red', 'green', 'blue'
+  ctx.putImageData(frame, 0, 0);
+  requestAnimationFrame(processFrame);
+}
+
+processFrame();
 
 // ═══════════════════════ NFC ═══════════════════════
 function renderNFC(container, idx) {
