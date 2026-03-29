@@ -1111,6 +1111,7 @@ const ENIGMAS = [
     id: 21, type: "Devinette", format: "text",
     narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
     image : "icons/avocat.png",
+    iframe : "https://scape.enepe.fr/ressources/cesar/""
     question: "ex kfymkd ocd ex pbesd ybsqsxksbo ne wohsaeo.",
     answer: ["un avocat est un fruit originaire du mexique"],
     hint: "A vo cat",
@@ -1407,6 +1408,18 @@ if (e.image) {
   body.appendChild(img);
 }
 
+// Iframe
+if (e.iframe) {
+  const iframe = document.createElement("iframe");
+  iframe.src = e.iframe;
+  iframe.width = "100%";
+  iframe.height = "600";
+  iframe.style.border = "none";
+  iframe.style.margin = "16px 0";
+
+  body.appendChild(iframe);
+}
+  
   // If already solved, show solved state
   if (isSolved) {
     const banner = document.createElement('div');
