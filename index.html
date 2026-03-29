@@ -595,9 +595,21 @@ html, body {
   mix-blend-mode: multiply;
   transition: background .4s ease;
 }
-.camera-filter.red { background: rgba(0, 255, 255, .85); }
-.camera-filter.green { background: rgba(255, 0, 255, .85); }
-.camera-filter.blue { background: rgba(255, 255, 0, .85); }
+.camera-filter.red {
+  backdrop-filter: grayscale(1) contrast(2) brightness(1.2);
+  background: rgba(255,0,0,0.2);
+}
+
+.camera-filter.green {
+  backdrop-filter: grayscale(1) contrast(2) brightness(1.2);
+  background: rgba(0,255,0,0.2);
+}
+
+.camera-filter.blue {
+  backdrop-filter: grayscale(1) contrast(2) brightness(1.2);
+  background: rgba(0,0,255,0.2);
+}
+  
 .camera-filter.off { background: transparent; }
 .camera-scanline {
   position: absolute; inset: 0;
