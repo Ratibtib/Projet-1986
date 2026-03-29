@@ -5,7 +5,7 @@ const ASSETS = [
   './Fouras.m4a',
   './manifest.json',
   
-  './icons/avatar1.png',
+  './icons/avatar.png',
   'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js'
 ];
