@@ -1490,7 +1490,7 @@ function renderTextInput(container, idx) {
     </div>
   `;
   container.appendChild(section);
-  setTimeout(() => document.getElementById('answer-field')?.focus(), 300);
+  
   document.getElementById('answer-field').addEventListener('keydown', (ev) => {
     if (ev.key === 'Enter') checkTextAnswer(idx);
   });
