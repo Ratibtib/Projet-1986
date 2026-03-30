@@ -981,9 +981,6 @@ const ENIGMAS = [
   {
     id: 5, type: "Audio Père Fouras", format: "audio",
     audioId: "fouras-audio",
-    hasWave: true,
-    hasSpeedControl: true,
-    hasDownload: true,
     narrative: "INTERCEPTION > Message audio capté. Le Père Fouras a parlé. Décodage nécessaire.",
     question: "Un message audio a été intercepté.\nÉcoutez attentivement et trouvez la réponse à l'énigme du Père Fouras.",
     answer: ["pas", "un pas"],
@@ -1199,11 +1196,8 @@ const ENIGMAS = [
   {
     id: 30, type: "Piano", format: "audio",
     audioId: "melody-audio",
-    hasWave: false,
-    hasSpeedControl: false,
-    hasDownload: false,
     narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
-    iframe: "https://lockee.fr/o/NEfc604n?nobg&noft",
+    iframe: "https://lockee.fr/o/NEfc604n",
     question: "A toi de jouer l'artiste !",
     answer: ["d'abord les copains"],
     hint: "A vo cat",
@@ -1442,7 +1436,7 @@ function renderEnigmaScreen(idx) {
     const iframe = document.createElement("iframe");
     iframe.src = e.iframe;
     iframe.width = "100%";
-    iframe.height = "100%";
+    iframe.height = "800";
     iframe.style.border = "none";
     iframe.style.margin = "16px 0";
     body.appendChild(iframe);
@@ -1576,134 +1570,99 @@ function renderRebus(container, idx) {
 
 // ═══════════════════════ AUDIO (Unified) ═══════════════════════
 let waveInterval = null;
-let currentAudio = null;
 
 function stopCurrentAudio() {
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-  }
+  // Stop any playing audio
+  try { document.getElementById('fouras-audio').pause(); document.getElementById('fouras-audio').currentTime = 0; } catch(e) {}
+  try { document.getElementById('melody-audio').pause(); document.getElementById('melody-audio').currentTime = 0; } catch(e) {}
+  window._audioPlaying = false;
   stopWaveAnim();
 }
 
-// 🔹 Toggle play/pause du BON audio
-function toggleAudio(audioId, btnId) {
-  const audio = document.getElementById(audioId);
-  const btn = document.getElementById(btnId);
-
-  if (!audio) return;
-
-  if (currentAudio && currentAudio !== audio) {
-    stopCurrentAudio();
-  }
-
-  if (audio.paused) {
-    audio.play();
-    currentAudio = audio;
-    btn.textContent = '⏸';
-    startWaveAnim(audioId);
-  } else {
-    audio.pause();
-    btn.textContent = '▶';
-    stopWaveAnim();
-  }
-}
-
-// 🔹 Vitesse UNIQUEMENT sur l’audio ciblé
-function setSpeed(audioId, speed, btnGroupId) {
-  const audio = document.getElementById(audioId);
-  if (!audio) return;
-
-  audio.playbackRate = speed;
-
-  // update UI active button
-  const group = document.getElementById(btnGroupId);
-  if (group) {
-    group.querySelectorAll('.speed-btn').forEach(btn => {
-      btn.classList.remove('active');
-      if (btn.dataset.speed == speed) {
-        btn.classList.add('active');
-      }
-    });
-  }
-}
-
-// 🔹 Animation wave ciblée
-function startWaveAnim(audioId) {
-  stopWaveAnim();
-  const wave = document.getElementById(`audio-wave-${audioId}`);
-  if (!wave) return;
-
-  waveInterval = setInterval(() => {
-    wave.querySelectorAll('.bar').forEach(bar => {
-      bar.style.height = (10 + Math.random() * 40) + 'px';
-    });
-  }, 200);
-}
-
-function stopWaveAnim() {
-  clearInterval(waveInterval);
-  waveInterval = null;
-}
-
-// ═══════════════════════ RENDER ═══════════════════════
 function renderAudioPlayer(container, idx) {
   const e = ENIGMAS[idx];
-  const audioId = e.audioId;
-
-  const {
-    hasWave = false,
-    hasSpeedControl = false,
-    hasDownload = false
-  } = e;
+  const audioId = e.audioId || 'fouras-audio';
+  window._currentAudioId = audioId;
 
   const player = document.createElement('div');
   player.className = 'audio-player';
 
-  // 🔹 WAVE
-  let barsHtml = '';
-  if (hasWave) {
-    barsHtml = `<div class="audio-wave" id="audio-wave-${audioId}">`;
-    for (let i = 0; i < 30; i++) {
-      barsHtml += `<div class="bar" style="height:${10 + Math.random() * 40}px"></div>`;
-    }
-    barsHtml += `</div>`;
-  }
+  let barsHtml = '<div class="audio-wave" id="audio-wave">';
+  for (let i = 0; i < 30; i++) barsHtml += `<div class="bar" style="height:${10+Math.random()*40}px"></div>`;
+  barsHtml += '</div>';
 
-  // 🔹 SPEED
-  const speedControlsHtml = hasSpeedControl ? `
-    <div class="audio-controls" id="speed-group-${audioId}" style="margin-top:12px">
-      <button class="speed-btn" data-speed="0.5" onclick="setSpeed('${audioId}', 0.5, 'speed-group-${audioId}')">×0.5</button>
-      <button class="speed-btn active" data-speed="1" onclick="setSpeed('${audioId}', 1, 'speed-group-${audioId}')">×1</button>
-      <button class="speed-btn" data-speed="1.5" onclick="setSpeed('${audioId}', 1.5, 'speed-group-${audioId}')">×1.5</button>
-    </div>
-  ` : '';
-
-  // 🔹 DOWNLOAD
-  const downloadHtml = hasDownload ? `
-    <div class="audio-download" style="margin-top:8px">
-      <a href="TON_LIEN_ICI" download>⬇️</a>
-    </div>
-  ` : '';
-
-  // 🔹 PLAYER HTML
+  // Lien de téléchargement uniquement pour Fouras
+  const downloadHtml = audioId === 'fouras-audio'
+    ? `<div class="audio-download" style="margin-top:8px">
+        <a href="https://1drv.ms/u/c/c5a2a521a2670743/IQBikpQfjRRaQ4iGv2pte795Aev7GRtGaeW71MKyULa_1YY?e=aN68pJ" download>⬇️</a>
+      </div>`
+    : '';
+  
+  const speedHtml = audioId === 'fouras-audio'
   player.innerHTML = `
     ${barsHtml}
-
     <div class="audio-controls">
-      <button class="play-btn" id="play-btn-${audioId}" onclick="toggleAudio('${audioId}', 'play-btn-${audioId}')">▶</button>
+      <button class="play-btn" id="play-btn" onclick="toggleAudio()">▶</button>
     </div>
-
-    ${speedControlsHtml}
-
-    <div class="audio-status">PRÊT — APPUYEZ SUR ▶</div>
-
+    <div class="audio-controls" style="margin-top:12px">
+      <button class="speed-btn" onclick="setSpeed(0.5)">×0.5</button>
+      <button class="speed-btn active" onclick="setSpeed(1)">×1</button>
+      <button class="speed-btn" onclick="setSpeed(1.5)">×1.5</button>
+    </div>
+    <div class="audio-status" id="audio-status">PRÊT — APPUYEZ SUR ▶</div>
     ${downloadHtml}
   `;
-
   container.appendChild(player);
-
   renderTextInput(container, idx);
+
+  // Setup audio element
+  const audio = document.getElementById(audioId);
+  audio.playbackRate = 1;
+  audio.currentTime = 0;
+  window._audioPlaying = false;
+
+  audio.onplay = () => {
+    window._audioPlaying = true;
+    document.getElementById('play-btn').textContent = '⏸';
+    document.getElementById('audio-status').textContent = 'LECTURE EN COURS...';
+    startWaveAnim();
+  };
+  audio.onpause = () => {
+    window._audioPlaying = false;
+    document.getElementById('play-btn').textContent = '▶';
+    document.getElementById('audio-status').textContent = 'EN PAUSE';
+    stopWaveAnim();
+  };
+  audio.onended = () => {
+    window._audioPlaying = false;
+    document.getElementById('play-btn').textContent = '▶';
+    document.getElementById('audio-status').textContent = 'TERMINÉ — REJOUEZ OU RÉPONDEZ';
+    stopWaveAnim();
+  };
+}
+
+window.toggleAudio = function() {
+  const audio = document.getElementById(window._currentAudioId);
+  if (!audio) return;
+  if (window._audioPlaying) { audio.pause(); } else { audio.play().catch(()=>{}); }
+};
+
+window.setSpeed = function(rate) {
+  const audio = document.getElementById(window._currentAudioId);
+  if (!audio) return;
+  audio.playbackRate = rate;
+  document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+};
+
+function startWaveAnim() {
+  stopWaveAnim();
+  waveInterval = setInterval(() => {
+    document.querySelectorAll('#audio-wave .bar').forEach(b => b.style.height = (5+Math.random()*50)+'px');
+  }, 100);
+}
+function stopWaveAnim() {
+  if (waveInterval) { clearInterval(waveInterval); waveInterval = null; }
 }
 
 // ═══════════════════════ GPS ═══════════════════════
