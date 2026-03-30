@@ -706,12 +706,12 @@ html, body {
 }
 
 /* ═══════════ AUDIO ═══════════ */
-.audio-player { background: var(--bg-card); border-radius: 16px; padding: 5px; text-align: center; }
-.audio-wave { display: flex; align-items: center; justify-content: center; gap: 3px; height: 50px; margin-bottom: (px; }
+.audio-player { background: var(--bg-card); border-radius: 16px; padding: 24px; text-align: center; }
+.audio-wave { display: flex; align-items: center; justify-content: center; gap: 3px; height: 60px; margin-bottom: 16px; }
 .audio-wave .bar { width: 4px; background: var(--accent); border-radius: 2px; transition: height .15s; }
 .audio-controls { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
 .play-btn {
-  width: 46px; height: 46px; border-radius: 50%;
+  width: 56px; height: 56px; border-radius: 50%;
   background: var(--accent); border: none;
   color: var(--bg-deep); font-size: 1.4rem;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -1444,7 +1444,7 @@ function renderEnigmaScreen(idx) {
     iframe.width = "100%";
     iframe.height = "100%";
     iframe.style.border = "none";
-    iframe.style.margin = "0px 0";
+    iframe.style.margin = "16px 0";
     body.appendChild(iframe);
   }
 
