@@ -439,7 +439,6 @@ html, body {
 .gps-map-wrap .leaflet-control-zoom {
   display: none !important;
 }
-/* Radar sweep overlay on map */
 .gps-map-overlay {
   position: absolute; inset: 0;
   pointer-events: none; z-index: 500;
@@ -513,7 +512,6 @@ html, body {
   border-radius: 3px;
   letter-spacing: 1px;
 }
-/* Vignette effect for round edges */
 .gps-map-wrap::after {
   content: '';
   position: absolute; inset: 0;
@@ -596,7 +594,7 @@ html, body {
   background: #000;
 }
 .camera-viewfinder video {
-  display: none; /* hidden — we draw to canvas instead */
+  display: none;
 }
 .camera-viewfinder canvas {
   width: 100%; height: 100%;
@@ -928,13 +926,13 @@ html, body {
   <button onclick="document.getElementById('dev-bar').style.display='none'">✕</button>
 </div>
 
-<!-- AUDIO ELEMENT (hidden) -->
+<!-- AUDIO ELEMENTS (hidden) -->
 <audio id="fouras-audio" preload="auto" src="Fouras.m4a"></audio>
 <audio id="melody-audio" preload="auto" src="melody.wav"></audio>
 
 <script>
 // ═══════════════════════ CONFIGURATION ═══════════════════════
-const ACT_BOUNDARIES = [0, 8, 16, 24, 32, 40]; // indices where each act starts, last = total
+const ACT_BOUNDARIES = [0, 8, 16, 24, 32, 40];
 const ACTS = [
   { name: "INITIALISATION", subtitle: "Vérification d'identité" },
   { name: "CALIBRATION", subtitle: "Tests cognitifs" },
@@ -944,7 +942,7 @@ const ACTS = [
 ];
 
 const ENIGMAS = [
-  // ── ACTE 1 : INITIALISATION (0-3) ──
+  // ── ACTE 1 : INITIALISATION (0-7) ──
   {
     id: 1, type: "Culture", format: "text",
     narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
@@ -980,10 +978,9 @@ const ENIGMAS = [
     hint: "La première image = un bélier (ram). La deuxième = chaud ?",
     title: "Symboles Cachés"
   },
-
-  // ── ACTE 2 : CALIBRATION (4-7) ──
   {
     id: 5, type: "Audio Père Fouras", format: "audio",
+    audioId: "fouras-audio",
     narrative: "INTERCEPTION > Message audio capté. Le Père Fouras a parlé. Décodage nécessaire.",
     question: "Un message audio a été intercepté.\nÉcoutez attentivement et trouvez la réponse à l'énigme du Père Fouras.",
     answer: ["pas", "un pas"],
@@ -1018,7 +1015,7 @@ const ENIGMAS = [
     title: "Le Piège du Bus"
   },
 
-  // ── ACTE 3 : ÉPREUVES (8-11) ──
+  // ── ACTE 2 : CALIBRATION (8-15) ──
   {
     id: 9, type: "Devinette", format: "text",
     narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
@@ -1050,8 +1047,6 @@ const ENIGMAS = [
     hint: "Patience... le système va se rétablir 😏",
     title: "/// ERREUR SYSTÈME ///"
   },
-
-  // ── ACTE 4 : ACTIVATION (12-16) ──
   {
     id: 13, type: "Scan NFC", format: "nfc",
     narrative: "MODULE NFC > Tag détecté à proximité. Approchez votre appareil.",
@@ -1084,6 +1079,8 @@ const ENIGMAS = [
     hint: "Vois-tu les années ?",
     title: "La Faim"
   },
+
+  // ── ACTE 3 : ÉPREUVES (16-23) ──
   {
     id: 17, type: "Vision Secrète", format: "camera",
     narrative: "MODULE OPTIQUE > Un message a été dissimulé sur un document physique. Seul un filtre spécial peut le révéler.",
@@ -1095,7 +1092,7 @@ const ENIGMAS = [
   {
     id: 18, type: "Labyrinthe", format: "text",
     narrative: "MODULE calcul > Un code a été dissimulé sur un document physique. Seul le chemin du labyrinthe peut le révéler.",
-    image : "icons/labyrinthe_opp_c.png",
+    image: "icons/labyrinthe_opp_c.png",
     question: "",
     answer: ["FY57X?N3PML90R6ID"],
     hint: "F----[...]----D",
@@ -1109,7 +1106,6 @@ const ENIGMAS = [
     hint: "3 fois tu voleras",
     title: "La machine"
   },
-
   {
     id: 20, type: "Devinette", format: "text",
     narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
@@ -1118,37 +1114,35 @@ const ENIGMAS = [
     hint: "Tout",
     title: "L'essentiel"
   },
-
   {
     id: 21, type: "Devinette", format: "text",
     narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
-    iframe : "https://scape.enepe.fr/ressources/cesar/index2.html",
+    iframe: "https://scape.enepe.fr/ressources/cesar/index2.html",
     question: "🥑 - AVOCAT - 🥑\n\nex kfymkd ocd ex pbesd ybsqsxksbo ne wohsaeo.",
     answer: ["un avocat est un fruit originaire du mexique"],
     hint: "A vo cat",
     title: "Avocat"
   },
-
   {
     id: 22, type: "Cadena", format: "text",
     narrative: "MODULE logique > Un code a été dissimulé sur un document physique. Sauras-tu le révéler.",
-    image : "icons/cadena.png",
+    image: "icons/cadena.png",
     question: "",
     answer: ["868"],
     hint: "X-Y-X",
     title: "Le cadena"
   },
-
   {
     id: 23, type: "Pieds", format: "text",
     narrative: "MODULE logique > Un code a été dissimulé sur un document physique. Sauras-tu le révéler.",
-    image : "icons/pieds.png",
+    image: "icons/pieds.png",
     question: "Combien de pieds voyez-vous ?",
     answer: ["12"],
     hint: "La tête en bas",
     title: "Les pieds"
   },
 
+  // ── ACTE 4 : ACTIVATION (24-31) ──
   {
     id: 24, type: "Nombre", format: "text",
     narrative: "MODULE logique > Un code a été dissimulé sur un document physique. Sauras-tu le révéler.",
@@ -1157,8 +1151,7 @@ const ENIGMAS = [
     hint: "La tête en bas",
     title: "Les pieds"
   },
-
-   {
+  {
     id: 25, type: "Culture", format: "text",
     narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
     question: "Je suis entre 188 et 190, mais je ne suis pas 189.\n\nQui suis-je ?",
@@ -1166,8 +1159,7 @@ const ENIGMAS = [
     hint: "Sa Majesté de l'Air...",
     title: "188-190"
   },
-
-   {
+  {
     id: 26, type: "Culture", format: "text",
     narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
     question: "Grâce à moi, elle est belle !\n\nQui suis-je ?",
@@ -1175,46 +1167,44 @@ const ENIGMAS = [
     hint: "Sa Majesté de l'Air...",
     title: "Belle"
   },
-
   {
     id: 27, type: "Culture", format: "text",
     narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
-    question: "Je suis né muet mais après 40 ans,\n\nj’ai enfin fini par parler.\n\nQui suis-je ?",
+    question: "Je suis né muet mais après 40 ans,\n\nj'ai enfin fini par parler.\n\nQui suis-je ?",
     answer: ["cinéma"],
     hint: "Sa Majesté de l'Air...",
     title: "Belle"
   },
-
-   {
+  {
     id: 28, type: "Mots mélangés", format: "text",
     narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
-    iframe : "https://ladigitale.dev/digilock/#/l/69cae36e5a4fc?vue=apercu",
+    iframe: "https://ladigitale.dev/digilock/#/l/69cae36e5a4fc?vue=apercu",
     question: "Cherche et trouve",
     answer: ["RAMOUSSE'S"],
     hint: "A vo cat",
     title: "Trouvé"
   },
-
   {
     id: 29, type: "Cadena", format: "text",
     narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
-    iframe : "https://lockee.fr/o/a3ds9RFX",
+    iframe: "https://lockee.fr/o/a3ds9RFX",
     question: "A vous tous vous atteignez 288",
     answer: ["le prince de bel air"],
     hint: "A vo cat",
     title: "Click"
   },
-
   {
     id: 30, type: "Piano", format: "audio",
+    audioId: "melody-audio",
     narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
-    iframe : "https://lockee.fr/o/NEfc604n",
-    question: "A toi d ejouer l'artiste !",
+    iframe: "https://lockee.fr/o/NEfc604n",
+    question: "A toi de jouer l'artiste !",
     answer: ["d'abord les copains"],
     hint: "A vo cat",
     title: "Lalala"
   },
-  
+
+  // ── ACTE 5 : VALIDATION (32-39) ──
   {
     id: 40, type: "Puzzle Final", format: "puzzle",
     narrative: "SÉQUENCE FINALE > Reconstituez l'image pour déverrouiller la récompense.",
@@ -1227,8 +1217,6 @@ const ENIGMAS = [
 
 const TOTAL = ENIGMAS.length;
 
-
-  
 // ═══════════════════════ STATE ═══════════════════════
 let STATE = loadState();
 
@@ -1283,7 +1271,6 @@ const bootLines = [
 ];
 
 function runBoot() {
-  // If already started, skip boot
   if (STATE.started && STATE.solved.length > 0) {
     showHub(); return;
   }
@@ -1299,7 +1286,6 @@ function runBoot() {
       log.scrollTop = log.scrollHeight;
     }, total);
   });
-  // Show buttons after boot
   setTimeout(() => {
     document.getElementById('boot-buttons').style.display = 'block';
     showInstallButton();
@@ -1315,15 +1301,13 @@ function startGame() {
 
 // ═══════════════════════ HUB ═══════════════════════
 function showHub() {
-  // Cleanup GPS watch if active
   if (gpsWatchId !== null) {
     navigator.geolocation.clearWatch(gpsWatchId);
     gpsWatchId = null;
   }
-  // Cleanup Leaflet map
   cleanupGPSMap();
-  // Cleanup camera
   stopCamera();
+  stopCurrentAudio();
   showScreen('hub-screen');
   renderHub();
 }
@@ -1357,11 +1341,10 @@ function renderHub() {
     title.innerHTML = `ACTE ${ai+1} — ${act.name} <span class="act-line"></span>`;
     group.appendChild(title);
 
-      // wrapper grid
     const cards = document.createElement('div');
     cards.className = 'act-cards';
     group.appendChild(cards);
-    
+
     actEnigmas.forEach((e, i) => {
       const idx = startIdx + i;
       const isSolved = STATE.solved.includes(idx);
@@ -1379,7 +1362,7 @@ function renderHub() {
         <div class="enigma-arrow">${isSolved ? '✓' : isCurrent ? '›' : isLocked ? '🔒' : '›'}</div>
       `;
       if (!isLocked) card.onclick = () => openEnigma(idx);
-      cards.appendChild(card);;
+      cards.appendChild(card);
     });
     container.appendChild(group);
   });
@@ -1400,12 +1383,10 @@ function openEnigma(idx) {
   const e = ENIGMAS[idx];
   const isSolved = STATE.solved.includes(idx);
 
-  // Fake bug
   if (idx === 11 && e.format === 'fakebug' && !isSolved) {
     triggerFakeBug(idx); return;
   }
 
-  // Act transition for first unsolved in a new act
   if (!isSolved && idx > 0) {
     const actIdx = getActForIndex(idx);
     const prevActIdx = getActForIndex(idx - 1);
@@ -1429,7 +1410,6 @@ function renderEnigmaScreen(idx) {
   body.innerHTML = '';
   body.dataset.idx = idx;
 
-  // Narrative
   if (e.narrative) {
     const narr = document.createElement('div');
     narr.className = 'enigma-narrative';
@@ -1437,7 +1417,6 @@ function renderEnigmaScreen(idx) {
     body.appendChild(narr);
   }
 
-  // Question
   if (e.question) {
     const q = document.createElement('div');
     q.className = 'enigma-question';
@@ -1445,28 +1424,24 @@ function renderEnigmaScreen(idx) {
     body.appendChild(q);
   }
 
-  // Image
-if (e.image) {
-  const img = document.createElement("img");
-  img.src = e.image;
-  img.style.maxWidth = "100%";
-  img.style.margin = "16px 0";
-  body.appendChild(img);
-}
+  if (e.image) {
+    const img = document.createElement("img");
+    img.src = e.image;
+    img.style.maxWidth = "100%";
+    img.style.margin = "16px 0";
+    body.appendChild(img);
+  }
 
-// Iframe
-if (e.iframe) {
-  const iframe = document.createElement("iframe");
-  iframe.src = e.iframe;
-  iframe.width = "100%";
-  iframe.height = "800";
-  iframe.style.border = "none";
-  iframe.style.margin = "16px 0";
+  if (e.iframe) {
+    const iframe = document.createElement("iframe");
+    iframe.src = e.iframe;
+    iframe.width = "100%";
+    iframe.height = "800";
+    iframe.style.border = "none";
+    iframe.style.margin = "16px 0";
+    body.appendChild(iframe);
+  }
 
-  body.appendChild(iframe);
-}
-  
-  // If already solved, show solved state
   if (isSolved) {
     const banner = document.createElement('div');
     banner.className = 'solved-banner';
@@ -1479,12 +1454,10 @@ if (e.iframe) {
     return;
   }
 
-  // Hint button
   document.getElementById('hint-btn').style.display = STATE.hintUsed.includes(idx) ? 'none' : '';
   window._currentHint = e.hint;
   window._currentIdx = idx;
 
-  // Show hint if already used
   if (STATE.hintUsed.includes(idx)) {
     const hint = document.createElement('div');
     hint.className = 'enigma-narrative';
@@ -1495,7 +1468,6 @@ if (e.iframe) {
     body.appendChild(hint);
   }
 
-  // Render format
   switch (e.format) {
     case 'text': renderTextInput(body, idx); break;
     case 'flashlight': renderFlashlight(body, idx); break;
@@ -1521,7 +1493,7 @@ function renderTextInput(container, idx) {
     </div>
   `;
   container.appendChild(section);
-  
+
   document.getElementById('answer-field').addEventListener('keydown', (ev) => {
     if (ev.key === 'Enter') checkTextAnswer(idx);
   });
@@ -1596,14 +1568,35 @@ function renderRebus(container, idx) {
   renderTextInput(container, idx);
 }
 
-// ═══════════════════════ AUDIO (Père Fouras) ═══════════════════════
+// ═══════════════════════ AUDIO (Unified) ═══════════════════════
+let waveInterval = null;
+
+function stopCurrentAudio() {
+  // Stop any playing audio
+  try { document.getElementById('fouras-audio').pause(); document.getElementById('fouras-audio').currentTime = 0; } catch(e) {}
+  try { document.getElementById('melody-audio').pause(); document.getElementById('melody-audio').currentTime = 0; } catch(e) {}
+  window._audioPlaying = false;
+  stopWaveAnim();
+}
+
 function renderAudioPlayer(container, idx) {
+  const e = ENIGMAS[idx];
+  const audioId = e.audioId || 'fouras-audio';
+  window._currentAudioId = audioId;
+
   const player = document.createElement('div');
   player.className = 'audio-player';
 
   let barsHtml = '<div class="audio-wave" id="audio-wave">';
   for (let i = 0; i < 30; i++) barsHtml += `<div class="bar" style="height:${10+Math.random()*40}px"></div>`;
   barsHtml += '</div>';
+
+  // Lien de téléchargement uniquement pour Fouras
+  const downloadHtml = audioId === 'fouras-audio'
+    ? `<div class="audio-download" style="margin-top:8px">
+        <a href="https://1drv.ms/u/c/c5a2a521a2670743/IQBikpQfjRRaQ4iGv2pte795Aev7GRtGaeW71MKyULa_1YY?e=aN68pJ" download>⬇️</a>
+      </div>`
+    : '';
 
   player.innerHTML = `
     ${barsHtml}
@@ -1616,15 +1609,13 @@ function renderAudioPlayer(container, idx) {
       <button class="speed-btn" onclick="setSpeed(1.5)">×1.5</button>
     </div>
     <div class="audio-status" id="audio-status">PRÊT — APPUYEZ SUR ▶</div>
-    <div class="audio-download" style="margin-top:8px">
-    <a href="https://1drv.ms/u/c/c5a2a521a2670743/IQBikpQfjRRaQ4iGv2pte795Aev7GRtGaeW71MKyULa_1YY?e=aN68pJ" download>⬇️</a>
-  </div>
+    ${downloadHtml}
   `;
   container.appendChild(player);
   renderTextInput(container, idx);
 
-  // Setup audio
-  const audio = document.getElementById('fouras-audio');
+  // Setup audio element
+  const audio = document.getElementById(audioId);
   audio.playbackRate = 1;
   audio.currentTime = 0;
   window._audioPlaying = false;
@@ -1650,18 +1641,19 @@ function renderAudioPlayer(container, idx) {
 }
 
 window.toggleAudio = function() {
-  const audio = document.getElementById('fouras-audio');
+  const audio = document.getElementById(window._currentAudioId);
+  if (!audio) return;
   if (window._audioPlaying) { audio.pause(); } else { audio.play().catch(()=>{}); }
 };
 
 window.setSpeed = function(rate) {
-  const audio = document.getElementById('fouras-audio');
+  const audio = document.getElementById(window._currentAudioId);
+  if (!audio) return;
   audio.playbackRate = rate;
   document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
 };
 
-let waveInterval = null;
 function startWaveAnim() {
   stopWaveAnim();
   waveInterval = setInterval(() => {
@@ -1672,10 +1664,7 @@ function stopWaveAnim() {
   if (waveInterval) { clearInterval(waveInterval); waveInterval = null; }
 }
 
-
-  
 // ═══════════════════════ GPS ═══════════════════════
-
 let gpsMap = null;
 let gpsPlayerMarker = null;
 let gpsAccuracyCircle = null;
@@ -1700,12 +1689,10 @@ function bearingTo(lat1, lon1, lat2, lon2) {
 }
 
 function distToZoom(dist) {
-  // Progressive zoom: 10km+ → zoom 12 (20km diameter), 0m → zoom 17
-  const MAX_DIST = 10000; // 10km radius = 20km diameter
+  const MAX_DIST = 10000;
   const MIN_ZOOM = 12;
   const MAX_ZOOM = 17;
   const clamped = Math.max(50, Math.min(dist, MAX_DIST));
-  // Logarithmic interpolation for smooth feel
   const t = 1 - Math.log(clamped / 50) / Math.log(MAX_DIST / 50);
   return MIN_ZOOM + t * (MAX_ZOOM - MIN_ZOOM);
 }
@@ -1715,7 +1702,6 @@ function updateEdgeBlip(lat, lng, targetLat, targetLng, dist) {
   const label = document.getElementById('gps-edge-dist');
   if (!blip || !gpsMap) return;
 
-  // Check if target is visible on map
   const targetPoint = gpsMap.latLngToContainerPoint([targetLat, targetLng]);
   const mapSize = gpsMap.getSize();
   const cx = mapSize.x / 2;
@@ -1726,16 +1712,14 @@ function updateEdgeBlip(lat, lng, targetLat, targetLng, dist) {
   const distFromCenter = Math.sqrt(dx*dx + dy*dy);
 
   if (distFromCenter < radius - 15) {
-    // Target is visible on map, hide edge blip
     blip.style.display = 'none';
     label.style.display = 'none';
     return;
   }
 
-  // Target is off-screen — show blip at edge of circle
   const bearing = bearingTo(lat, lng, targetLat, targetLng);
-  const angleRad = (bearing - 90) * Math.PI / 180; // CSS: 0=right, -90=top
-  const edgeR = 122; // slightly inside the 130px radius of the 260px circle
+  const angleRad = (bearing - 90) * Math.PI / 180;
+  const edgeR = 122;
   const bx = 130 + edgeR * Math.cos(angleRad);
   const by = 130 + edgeR * Math.sin(angleRad);
 
@@ -1743,11 +1727,9 @@ function updateEdgeBlip(lat, lng, targetLat, targetLng, dist) {
   blip.style.left = bx + 'px';
   blip.style.top = by + 'px';
 
-  // Rotate arrow to point toward target
   const arrow = blip.querySelector('.edge-arrow');
   if (arrow) arrow.style.transform = `translateX(-50%) rotate(${bearing}deg)`;
 
-  // Distance label slightly inward
   const labelR = edgeR - 18;
   const lx = 130 + labelR * Math.cos(angleRad);
   const ly = 130 + labelR * Math.sin(angleRad);
@@ -1757,7 +1739,6 @@ function updateEdgeBlip(lat, lng, targetLat, targetLng, dist) {
   label.style.top = ly + 'px';
   label.textContent = distText;
 
-  // Color based on distance
   const color = dist <= 500 ? '#00ff88' : dist <= 1000 ? '#ffd700' : '#ff3366';
   blip.style.background = color;
   blip.style.boxShadow = `0 0 10px ${color}, 0 0 20px ${color}44`;
@@ -1800,7 +1781,6 @@ function renderGPS(container, idx) {
   `;
   container.appendChild(module);
 
-  // Init Leaflet map
   setTimeout(() => {
     const TARGET = e.gpsTarget;
     gpsMap = L.map('gps-map', {
@@ -1817,12 +1797,10 @@ function renderGPS(container, idx) {
       tap: false,
     });
 
-    // Dark tile layer matching app theme
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
     }).addTo(gpsMap);
 
-    // Target zone circle (pulsing, transparent cyan)
     gpsTargetZone = L.circle([TARGET.lat, TARGET.lng], {
       radius: e.gpsRadius,
       color: '#00f0ff',
@@ -1833,7 +1811,6 @@ function renderGPS(container, idx) {
       dashArray: '6 4',
     }).addTo(gpsMap);
 
-    // Target center marker (small crosshair)
     const targetIcon = L.divIcon({
       className: '',
       html: `<div style="
@@ -1847,7 +1824,6 @@ function renderGPS(container, idx) {
       iconAnchor: [7, 7],
     });
     L.marker([TARGET.lat, TARGET.lng], { icon: targetIcon, interactive: false }).addTo(gpsMap);
-
   }, 100);
 }
 
@@ -1887,9 +1863,7 @@ window.startGPSTracking = function(idx) {
       const acc = Math.round(pos.coords.accuracy);
       const dist = haversineDistance(lat, lng, TARGET.lat, TARGET.lng);
 
-      // Update map
       if (gpsMap) {
-        // Player marker
         if (!gpsPlayerMarker) {
           const playerIcon = L.divIcon({
             className: '',
@@ -1906,7 +1880,6 @@ window.startGPSTracking = function(idx) {
           });
           gpsPlayerMarker = L.marker([lat, lng], { icon: playerIcon, zIndexOffset: 1000 }).addTo(gpsMap);
 
-          // Accuracy circle
           gpsAccuracyCircle = L.circle([lat, lng], {
             radius: acc,
             color: '#00f0ff',
@@ -1921,14 +1894,11 @@ window.startGPSTracking = function(idx) {
           gpsAccuracyCircle.setRadius(acc);
         }
 
-        // Always center map on player, progressive zoom based on distance
         if (gpsMap) {
           gpsMap.setView([lat, lng], distToZoom(dist), { animate: true, duration: 1 });
-          // Update edge blip for target visibility
           updateEdgeBlip(lat, lng, TARGET.lat, TARGET.lng, dist);
         }
 
-        // Update target zone color based on proximity
         if (gpsTargetZone) {
           if (dist <= RADIUS) {
             gpsTargetZone.setStyle({ color: '#00ff88', fillColor: '#00ff88', fillOpacity: 0.15 });
@@ -1940,15 +1910,12 @@ window.startGPSTracking = function(idx) {
         }
       }
 
-      // Update distance bar
       updateDistanceBar(dist, RADIUS);
 
-      // Distance display
       const distDisplay = dist > 1000 ? (dist/1000).toFixed(1) + ' km' : Math.round(dist) + ' m';
       document.getElementById('gps-dist-val').textContent = distDisplay;
 
       if (dist <= RADIUS && !revealed) {
-        // SUCCESS
         revealed = true;
         navigator.geolocation.clearWatch(gpsWatchId);
         gpsWatchId = null;
@@ -1960,9 +1927,7 @@ window.startGPSTracking = function(idx) {
 
         playSuccess();
 
-        // Flash map zone green
         if (gpsTargetZone) gpsTargetZone.setStyle({ fillOpacity: 0.3 });
-        // Hide edge indicator
         const eb = document.getElementById('gps-edge-blip');
         const ed = document.getElementById('gps-edge-dist');
         if (eb) eb.style.display = 'none';
@@ -1992,7 +1957,6 @@ window.startGPSTracking = function(idx) {
         document.getElementById('gps-dist-status').style.color = 'var(--warn)';
       }
 
-      // Beep based on proximity
       if (!revealed) {
         playTone(800 - Math.min(dist/5, 600), .05);
       }
@@ -2030,10 +1994,9 @@ function updateDistanceBar(dist, radius) {
   }
 }
 
-// ═══════════════════════ CAMERA (Red Filter) ═══════════════════════
 // ═══════════════════════ CAMERA (Pixel Processing) ═══════════════════════
 let camAnimFrame = null;
-let camActiveFilter = null; // null | 'r' | 'g' | 'b'
+let camActiveFilter = null;
 
 function stopCamera() {
   if (camAnimFrame) { cancelAnimationFrame(camAnimFrame); camAnimFrame = null; }
@@ -2100,7 +2063,6 @@ function renderCamera(container, idx) {
 }
 
 function startCamera() {
-  // Stop existing
   if (camAnimFrame) { cancelAnimationFrame(camAnimFrame); camAnimFrame = null; }
   if (cameraStream) {
     cameraStream.getTracks().forEach(t => t.stop());
@@ -2154,26 +2116,18 @@ function processFrame() {
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const d = imageData.data;
 
-      // Pixel processing: isolate the selected channel
-      // This simulates looking through a colored filter:
-      // - Red filter: only red channel → blue/green text disappears, red text blends
-      // - Blue filter: only blue channel → red text disappears, blue text blends
       for (let i = 0; i < d.length; i += 4) {
         const r = d[i], g = d[i+1], b = d[i+2];
 
         if (camActiveFilter === 'r') {
-          // Isolate red: show red channel as grayscale, suppress blue/green
-          // Text printed in blue will appear dark, red text blends into bright
-          d[i]   = r;          // keep red
-          d[i+1] = r * 0.15;   // suppress green, slight tint
-          d[i+2] = r * 0.1;    // suppress blue
+          d[i]   = r;
+          d[i+1] = r * 0.15;
+          d[i+2] = r * 0.1;
         } else if (camActiveFilter === 'g') {
           d[i]   = g * 0.15;
           d[i+1] = g;
           d[i+2] = g * 0.1;
         } else if (camActiveFilter === 'b') {
-          // Isolate blue: show blue channel as grayscale, suppress red/green
-          // Text printed in red will appear dark, blue text blends into bright
           d[i]   = b * 0.1;
           d[i+1] = b * 0.15;
           d[i+2] = b;
@@ -2193,12 +2147,10 @@ window.setCamFilter = function(ch) {
   camActiveFilter = ch;
   const label = document.getElementById('cam-filter-label');
 
-  // Update all buttons
   document.querySelectorAll('.cam-filter-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.ch === (ch || 'off'));
   });
 
-  // Update HUD label
   if (!ch) {
     label.textContent = 'NORMAL';
     label.style.color = 'var(--text-dim)';
@@ -2297,7 +2249,6 @@ function renderPuzzle(container, idx) {
 // ═══════════════════════ FAKE BUG ═══════════════════════
 function triggerFakeBug(idx) {
   showScreen('bug-screen');
-  // Reset bug screen content
   document.querySelector('#bug-screen .bug-content').innerHTML = `
     <div class="bug-icon">⚠️</div>
     <div class="bug-text">ERREUR SYSTÈME CRITIQUE<br>Module [ENIGMA_CORE] corrompu<br>Tentative de récupération...<br><br><span style="color:#666">Ne fermez pas l'application</span></div>
@@ -2324,11 +2275,8 @@ function solveEnigma(idx) {
     STATE.currentEnigma = Math.max(STATE.currentEnigma, idx + 1);
     saveState();
   }
-  // Stop audio if playing
-  try { document.getElementById('fouras-audio').pause(); } catch(e) {}
-  // Stop GPS tracking if active
+  stopCurrentAudio();
   if (gpsWatchId !== null) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
-  // Stop camera if active
   stopCamera();
 
   if (STATE.solved.length >= TOTAL) {
@@ -2384,14 +2332,12 @@ window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
   console.log('Install prompt captured');
-  // Update button if boot is already done
   showInstallButton();
 });
 
 window.addEventListener('appinstalled', () => {
   console.log('PWA installed');
   deferredPrompt = null;
-  // Auto-continue after install
   setTimeout(() => showScreen('intro-screen'), 500);
 });
 
@@ -2411,21 +2357,17 @@ function showInstallButton() {
   const hint = document.getElementById('install-hint');
 
   if (isStandalone()) {
-    // Already running as PWA
     btnEnter.style.display = 'inline-block';
   } else if (deferredPrompt) {
-    // Chrome/Android — install prompt available
     btnInstall.style.display = 'inline-block';
     btnSkip.style.display = 'inline-block';
   } else if (isIOS()) {
-    // iOS — manual instructions
     btnInstall.style.display = 'none';
     hint.style.display = 'block';
     hint.innerHTML = '📱 Pour installer sur iPhone :<br>Appuyez sur <strong style="color:var(--accent)">Partager ⬆</strong> puis<br><strong style="color:var(--accent)">Sur l\'écran d\'accueil</strong>';
     btnSkip.style.display = 'inline-block';
     btnSkip.textContent = 'CONTINUER ›';
   } else {
-    // Other browser — just enter
     btnEnter.style.display = 'inline-block';
   }
 }
@@ -2442,7 +2384,6 @@ function installPWA() {
     if (result.outcome === 'accepted') {
       // Will trigger appinstalled event
     } else {
-      // User declined — continue anyway
       showScreen('intro-screen');
     }
   });
@@ -2456,12 +2397,10 @@ function skipInstall() {
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('total-display').textContent = TOTAL + ' épreuves';
   runBoot();
-  // Register Service Worker for PWA
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js', { scope: './' })
       .then(reg => {
         console.log('SW registered, scope:', reg.scope);
-        // Force update check
         reg.update();
       })
       .catch(e => console.log('SW error', e));
