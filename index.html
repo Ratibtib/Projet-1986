@@ -175,7 +175,12 @@ html, body {
   border-radius: 2px; box-shadow: 0 0 10px var(--accent-glow);
 }
 .acts-container { padding: 20px; flex: 1; }
-.act-group { margin-bottom: 24px; }
+.act-group { 
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px; 
+}
 .act-title {
   font-family: var(--font-display);
   font-size: .6rem; letter-spacing: 3px; color: var(--text-dim);
