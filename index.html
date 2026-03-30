@@ -1597,7 +1597,8 @@ function renderAudioPlayer(container, idx) {
         <a href="https://1drv.ms/u/c/c5a2a521a2670743/IQBikpQfjRRaQ4iGv2pte795Aev7GRtGaeW71MKyULa_1YY?e=aN68pJ" download>⬇️</a>
       </div>`
     : '';
-
+  
+  const speedHtml = audioId === 'fouras-audio'
   player.innerHTML = `
     ${barsHtml}
     <div class="audio-controls">
