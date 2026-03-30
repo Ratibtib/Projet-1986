@@ -711,7 +711,7 @@ html, body {
 .audio-wave .bar { width: 4px; background: var(--accent); border-radius: 2px; transition: height .15s; }
 .audio-controls { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
 .play-btn {
-  width: 56px; height: 56px; border-radius: 50%;
+  width: 46px; height: 46px; border-radius: 50%;
   background: var(--accent); border: none;
   color: var(--bg-deep); font-size: 1.4rem;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -1197,7 +1197,7 @@ const ENIGMAS = [
     id: 30, type: "Piano", format: "audio",
     audioId: "melody-audio",
     narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
-    iframe: "https://lockee.fr/o/NEfc604n",
+    iframe: "https://lockee.fr/o/NEfc604n?nobg&noft",
     question: "A toi de jouer l'artiste !",
     answer: ["d'abord les copains"],
     hint: "A vo cat",
@@ -1438,7 +1438,7 @@ function renderEnigmaScreen(idx) {
     iframe.width = "100%";
     iframe.height = "100%";
     iframe.style.border = "none";
-    iframe.style.margin = "5px 0";
+    iframe.style.margin = "0px 0";
     body.appendChild(iframe);
   }
 
