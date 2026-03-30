@@ -176,10 +176,12 @@ html, body {
 }
 .acts-container { padding: 20px; flex: 1; }
 .act-group { 
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
   margin-bottom: 24px; 
+}
+.act-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
 }
 .act-title {
   font-family: var(--font-display);
