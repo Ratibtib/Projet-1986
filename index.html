@@ -80,6 +80,14 @@ html, body {
   0%,100% { border-color: var(--accent-dim); }
   50% { border-color: var(--accent); }
 }
+@keyframes torchPulse {
+  0%,100% { box-shadow: 0 0 40px 10px rgba(255,220,100,.3), inset 0 0 30px rgba(255,220,100,.1); }
+  50% { box-shadow: 0 0 80px 20px rgba(255,220,100,.5), inset 0 0 60px rgba(255,220,100,.2); }
+}
+@keyframes torchIconBounce {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
 
 /* ═══════════ SCREENS ═══════════ */
 .screen {
@@ -175,9 +183,7 @@ html, body {
   border-radius: 2px; box-shadow: 0 0 10px var(--accent-glow);
 }
 .acts-container { padding: 20px; flex: 1; }
-.act-group { 
-  margin-bottom: 24px; 
-}
+.act-group { margin-bottom: 24px; }
 
 .act-title {
   font-family: var(--font-display);
@@ -194,7 +200,7 @@ html, body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
-  
+
 .enigma-card {
   background: var(--bg-card);
   border: 1px solid #222233; border-radius: 12px;
@@ -372,27 +378,70 @@ html, body {
 .puzzle-piece.empty { background: transparent; border: 1px dashed #333; cursor: default; }
 .puzzle-piece.correct { background: var(--success-dim); color: var(--success); border-color: var(--success-dim); }
 
-/* ═══════════ FLASHLIGHT ═══════════ */
-.flashlight-area {
-  position: relative; width: 100%; height: 300px;
-  background: #000; border-radius: 12px;
-  overflow: hidden; cursor: none; touch-action: none;
+/* ═══════════ TORCH ═══════════ */
+.torch-module {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 20px;
+  text-align: center; padding: 10px;
 }
-.flashlight-area .hidden-text {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: var(--font-display);
-  font-size: 1.6rem; font-weight: 900;
-  color: var(--accent); letter-spacing: 4px;
-  text-align: center; white-space: nowrap; pointer-events: none;
-}
-.flashlight-area .torch {
-  position: absolute; width: 120px; height: 120px;
+.torch-zone {
+  width: 180px; height: 180px;
+  border: 2px solid #333;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,.15) 0%, transparent 70%);
-  transform: translate(-50%, -50%);
-  pointer-events: none; mix-blend-mode: screen;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px; cursor: pointer;
+  transition: all .4s ease;
+  background: var(--bg-card);
+  position: relative;
 }
+.torch-zone .torch-icon {
+  font-size: 3.5rem;
+  transition: transform .3s;
+}
+.torch-zone .torch-label {
+  font-family: var(--font-mono);
+  font-size: .65rem; color: var(--text-dim);
+  letter-spacing: 2px; text-transform: uppercase;
+}
+.torch-zone.active {
+  border-color: var(--gold);
+  background: radial-gradient(circle, rgba(255,220,100,.08) 0%, transparent 70%);
+  animation: torchPulse 2s ease infinite;
+}
+.torch-zone.active .torch-icon {
+  animation: torchIconBounce 1s ease infinite;
+}
+.torch-zone.active .torch-label {
+  color: var(--gold);
+}
+.torch-zone.success {
+  border-color: var(--success);
+  background: radial-gradient(circle, rgba(0,255,136,.1) 0%, transparent 70%);
+  animation: successPulse 1s ease;
+}
+.torch-zone.success .torch-label {
+  color: var(--success);
+}
+.torch-status {
+  font-family: var(--font-mono);
+  font-size: .6rem; color: var(--text-dim);
+  letter-spacing: 1px; line-height: 1.7;
+  max-width: 280px;
+}
+.torch-fallback {
+  margin-top: 10px;
+}
+.torch-fallback-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--warn-dim);
+  color: var(--warn);
+  font-family: var(--font-mono);
+  font-size: .6rem; letter-spacing: 1px;
+  padding: 10px 20px; border-radius: 8px;
+  cursor: pointer; transition: all .2s;
+}
+.torch-fallback-btn:active { background: var(--warn-dim); transform: scale(.95); }
 
 /* ═══════════ NFC ═══════════ */
 .nfc-zone {
@@ -417,11 +466,6 @@ html, body {
   70% { box-shadow: 0 0 0 14px transparent; }
   100% { box-shadow: 0 0 0 0 transparent; }
 }
-@keyframes zoneRipple {
-  0% { opacity: .6; }
-  50% { opacity: .3; }
-  100% { opacity: .6; }
-}
 .gps-module { text-align: center; }
 .gps-map-wrap {
   position: relative;
@@ -432,21 +476,16 @@ html, body {
   border: 2px solid var(--accent-dim);
   box-shadow: 0 0 30px rgba(0,240,255,.08), inset 0 0 40px rgba(0,0,0,.5);
 }
-.gps-map-wrap .leaflet-container {
-  background: var(--bg-deep) !important;
-}
+.gps-map-wrap .leaflet-container { background: var(--bg-deep) !important; }
 .gps-map-wrap .leaflet-control-attribution,
-.gps-map-wrap .leaflet-control-zoom {
-  display: none !important;
-}
+.gps-map-wrap .leaflet-control-zoom { display: none !important; }
 .gps-map-overlay {
   position: absolute; inset: 0;
   pointer-events: none; z-index: 500;
   border-radius: 50%;
 }
 .gps-map-overlay .sweep-line {
-  position: absolute;
-  top: 50%; left: 50%;
+  position: absolute; top: 50%; left: 50%;
   width: 50%; height: 2px;
   transform-origin: left center;
   background: linear-gradient(90deg, var(--accent), transparent);
@@ -519,9 +558,7 @@ html, body {
   box-shadow: inset 0 0 30px 10px rgba(10,10,15,.6);
   pointer-events: none; z-index: 501;
 }
-.gps-distance-wrap {
-  margin: 14px auto 0; max-width: 340px;
-}
+.gps-distance-wrap { margin: 14px auto 0; max-width: 340px; }
 .gps-distance-bar {
   height: 6px; background: var(--bg-card);
   border-radius: 3px; overflow: hidden;
@@ -593,9 +630,7 @@ html, body {
   border: 2px solid var(--accent-dim);
   background: #000;
 }
-.camera-viewfinder video {
-  display: none;
-}
+.camera-viewfinder video { display: none; }
 .camera-viewfinder canvas {
   width: 100%; height: 100%;
   object-fit: cover;
@@ -960,12 +995,11 @@ const ENIGMAS = [
     title: "La légende"
   },
   {
-    id: 3, type: "Interaction", format: "flashlight",
-    narrative: "ALERTE > Coupure de courant détectée. Le message secret est caché dans l'obscurité.",
-    question: "Un message est caché dans le noir.\nUtilisez votre doigt comme lampe torche pour le révéler.",
-    hiddenText: "LUMIÈRE",
-    answer: ["lumiere", "lumière", "la lumiere", "la lumière", "allumer la lumiere", "allumer la lumière"],
-    hint: "Balayez l'écran noir avec votre doigt pour révéler le mot caché.",
+    id: 3, type: "Interaction", format: "torch",
+    narrative: "ALERTE > Module optique compromis. Activation du flash requis pour débloquer le système.",
+    question: "Le système est plongé dans l'obscurité.\nAllumez la torche (flash) de votre téléphone pour réactiver le module.",
+    answer: ["ok"],
+    hint: "Appuyez sur le bouton pour activer le flash de votre téléphone. Si non supporté, utilisez le bouton de secours.",
     title: "Et la lumière fut"
   },
   {
@@ -1241,6 +1275,7 @@ function saveState() {
 let audioCtx = null;
 let gpsWatchId = null;
 let cameraStream = null;
+let torchStream = null; // dedicated stream for torch enigma
 function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
 function playTone(freq, dur, type='sine') {
   try {
@@ -1313,6 +1348,7 @@ function showHub() {
   }
   cleanupGPSMap();
   stopCamera();
+  stopTorch();
   stopCurrentAudio();
   showScreen('hub-screen');
   renderHub();
@@ -1476,7 +1512,7 @@ function renderEnigmaScreen(idx) {
 
   switch (e.format) {
     case 'text': renderTextInput(body, idx); break;
-    case 'flashlight': renderFlashlight(body, idx); break;
+    case 'torch': renderTorch(body, idx); break;
     case 'rebus': renderRebus(body, idx); break;
     case 'audio': renderAudioPlayer(body, idx); break;
     case 'gps': renderGPS(body, idx); break;
@@ -1533,25 +1569,151 @@ function checkTextAnswer(idx) {
   }
 }
 
-// ═══════════════════════ FLASHLIGHT ═══════════════════════
-function renderFlashlight(container, idx) {
-  const e = ENIGMAS[idx];
-  const area = document.createElement('div');
-  area.className = 'flashlight-area';
-  area.innerHTML = `<div class="hidden-text">${e.hiddenText}</div><div class="torch" id="torch" style="display:none"></div>`;
-  container.appendChild(area);
-  const torch = area.querySelector('.torch');
-  function moveTorch(x, y) {
-    const rect = area.getBoundingClientRect();
-    torch.style.display = 'block';
-    torch.style.left = (x - rect.left) + 'px';
-    torch.style.top = (y - rect.top) + 'px';
+// ═══════════════════════ TORCH (Enigma 3) ═══════════════════════
+function stopTorch() {
+  if (torchStream) {
+    torchStream.getTracks().forEach(t => t.stop());
+    torchStream = null;
   }
-  area.addEventListener('touchmove', (ev) => { ev.preventDefault(); moveTorch(ev.touches[0].clientX, ev.touches[0].clientY); }, { passive: false });
-  area.addEventListener('mousemove', (ev) => moveTorch(ev.clientX, ev.clientY));
-  area.addEventListener('touchend', () => torch.style.display = 'none');
-  area.addEventListener('mouseleave', () => torch.style.display = 'none');
-  renderTextInput(container, idx);
+}
+
+function renderTorch(container, idx) {
+  const module = document.createElement('div');
+  module.className = 'torch-module';
+
+  module.innerHTML = `
+    <div class="torch-zone" id="torch-zone">
+      <div class="torch-icon">🔦</div>
+      <div class="torch-label">APPUYEZ POUR ALLUMER</div>
+    </div>
+    <div class="torch-status" id="torch-status">
+      Activez le flash de votre téléphone pour réactiver le module.
+    </div>
+    <div class="feedback-msg" id="feedback"></div>
+    <div class="torch-fallback" id="torch-fallback" style="display:none;">
+      <div style="font-family:var(--font-mono);font-size:.55rem;color:var(--text-dim);margin-bottom:8px;letter-spacing:1px;">
+        Flash non supporté sur cet appareil ?
+      </div>
+      <button class="torch-fallback-btn" id="torch-fallback-btn">
+        🔦 J'AI ALLUMÉ MA TORCHE MANUELLEMENT
+      </button>
+    </div>
+  `;
+  container.appendChild(module);
+
+  const zone = document.getElementById('torch-zone');
+  const status = document.getElementById('torch-status');
+  const feedback = document.getElementById('feedback');
+  const fallbackWrap = document.getElementById('torch-fallback');
+  const fallbackBtn = document.getElementById('torch-fallback-btn');
+  let torchOn = false;
+
+  zone.addEventListener('click', async () => {
+    if (torchOn) return;
+
+    // Check if torch API is supported
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showTorchFallback();
+      return;
+    }
+
+    zone.querySelector('.torch-label').textContent = 'ACTIVATION...';
+    status.textContent = 'Demande d\'accès à la caméra...';
+    playTone(440, .1);
+
+    try {
+      // Request camera with torch
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        }
+      });
+
+      torchStream = stream;
+      const track = stream.getVideoTracks()[0];
+
+      // Check if torch is supported on this track
+      const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+      if (!capabilities.torch) {
+        // Torch not supported, stop stream and show fallback
+        stream.getTracks().forEach(t => t.stop());
+        torchStream = null;
+        showTorchFallback();
+        return;
+      }
+
+      // Turn on the torch!
+      await track.applyConstraints({
+        advanced: [{ torch: true }]
+      });
+
+      torchOn = true;
+      zone.classList.add('active');
+      zone.querySelector('.torch-icon').textContent = '💡';
+      zone.querySelector('.torch-label').textContent = 'FLASH ACTIVÉ';
+      status.innerHTML = '<span style="color:var(--gold)">💡 Torche allumée ! Vérification en cours...</span>';
+      playTone(660, .15);
+
+      // Short delay then validate
+      setTimeout(() => {
+        zone.classList.remove('active');
+        zone.classList.add('success');
+        zone.querySelector('.torch-icon').textContent = '✅';
+        zone.querySelector('.torch-label').textContent = 'MODULE RÉACTIVÉ';
+        status.innerHTML = '<span style="color:var(--success)">✓ LUMIÈRE DÉTECTÉE — MODULE DÉVERROUILLÉ</span>';
+        feedback.className = 'feedback-msg success';
+        feedback.textContent = '✓ ACCÈS AUTORISÉ';
+        playSuccess();
+
+        // Turn off torch after success
+        setTimeout(() => {
+          stopTorch();
+          solveEnigma(idx);
+        }, 1500);
+      }, 2000);
+
+    } catch (err) {
+      console.error('Torch error:', err);
+
+      if (err.name === 'NotAllowedError') {
+        status.innerHTML = '<span style="color:var(--warn)">⚠ Accès caméra refusé. Autorisez dans les paramètres.</span>';
+        zone.querySelector('.torch-label').textContent = 'APPUYEZ POUR RÉESSAYER';
+      } else if (err.name === 'NotFoundError' || err.name === 'NotReadableError') {
+        showTorchFallback();
+      } else {
+        showTorchFallback();
+      }
+    }
+  });
+
+  // Fallback button: manual confirmation
+  fallbackBtn.addEventListener('click', () => {
+    fallbackBtn.disabled = true;
+    fallbackBtn.textContent = '⏳ VÉRIFICATION...';
+    playTone(440, .1);
+
+    setTimeout(() => {
+      zone.classList.add('success');
+      zone.querySelector('.torch-icon').textContent = '✅';
+      zone.querySelector('.torch-label').textContent = 'MODULE RÉACTIVÉ';
+      status.innerHTML = '<span style="color:var(--success)">✓ CONFIRMATION ACCEPTÉE — MODULE DÉVERROUILLÉ</span>';
+      feedback.className = 'feedback-msg success';
+      feedback.textContent = '✓ ACCÈS AUTORISÉ';
+      playSuccess();
+
+      setTimeout(() => solveEnigma(idx), 1500);
+    }, 1500);
+  });
+
+  function showTorchFallback() {
+    zone.querySelector('.torch-label').textContent = 'FLASH NON DISPONIBLE';
+    zone.querySelector('.torch-icon').textContent = '⚠️';
+    status.innerHTML = '<span style="color:var(--warn)">Le flash n\'est pas accessible sur cet appareil.</span><br><span style="color:var(--text-dim)">Allumez votre torche manuellement, puis confirmez ci-dessous.</span>';
+    fallbackWrap.style.display = 'block';
+    playError();
+  }
 }
 
 // ═══════════════════════ REBUS ═══════════════════════
@@ -1586,7 +1748,6 @@ function stopCurrentAudio() {
   stopWaveAnim();
 }
 
-// 🔹 Toggle play/pause du BON audio
 function toggleAudio(audioId, btnId) {
   const audio = document.getElementById(audioId);
   const btn = document.getElementById(btnId);
@@ -1609,14 +1770,12 @@ function toggleAudio(audioId, btnId) {
   }
 }
 
-// 🔹 Vitesse UNIQUEMENT sur l’audio ciblé
 function setSpeed(audioId, speed, btnGroupId) {
   const audio = document.getElementById(audioId);
   if (!audio) return;
 
   audio.playbackRate = speed;
 
-  // update UI active button
   const group = document.getElementById(btnGroupId);
   if (group) {
     group.querySelectorAll('.speed-btn').forEach(btn => {
@@ -1628,7 +1787,6 @@ function setSpeed(audioId, speed, btnGroupId) {
   }
 }
 
-// 🔹 Animation wave ciblée
 function startWaveAnim(audioId) {
   stopWaveAnim();
   const wave = document.getElementById(`audio-wave-${audioId}`);
@@ -1646,7 +1804,6 @@ function stopWaveAnim() {
   waveInterval = null;
 }
 
-// ═══════════════════════ RENDER ═══════════════════════
 function renderAudioPlayer(container, idx) {
   const e = ENIGMAS[idx];
   const audioId = e.audioId;
@@ -1660,7 +1817,6 @@ function renderAudioPlayer(container, idx) {
   const player = document.createElement('div');
   player.className = 'audio-player';
 
-  // 🔹 WAVE
   let barsHtml = '';
   if (hasWave) {
     barsHtml = `<div class="audio-wave" id="audio-wave-${audioId}">`;
@@ -1670,7 +1826,6 @@ function renderAudioPlayer(container, idx) {
     barsHtml += `</div>`;
   }
 
-  // 🔹 SPEED
   const speedControlsHtml = hasSpeedControl ? `
     <div class="audio-controls" id="speed-group-${audioId}" style="margin-top:12px">
       <button class="speed-btn" data-speed="0.5" onclick="setSpeed('${audioId}', 0.5, 'speed-group-${audioId}')">×0.5</button>
@@ -1679,14 +1834,12 @@ function renderAudioPlayer(container, idx) {
     </div>
   ` : '';
 
-  // 🔹 DOWNLOAD
   const downloadHtml = hasDownload ? `
     <div class="audio-download" style="margin-top:8px">
       <a href="TON_LIEN_ICI" download>⬇️</a>
     </div>
   ` : '';
 
-  // 🔹 PLAYER HTML
   player.innerHTML = `
     ${barsHtml}
 
@@ -2318,6 +2471,7 @@ function solveEnigma(idx) {
     saveState();
   }
   stopCurrentAudio();
+  stopTorch();
   if (gpsWatchId !== null) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
   stopCamera();
 
