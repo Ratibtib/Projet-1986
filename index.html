@@ -970,7 +970,7 @@ html, body {
 const ACT_BOUNDARIES = [0, 8, 16, 24, 32, 40];
 const ACTS = [
   { name: "INITIALISATION", subtitle: "Vérification d'identité" },
-  { name: "CALIBRATION", subtitle: "Tests cognitifs" },
+  { name: "CALIBRATION", subtitle: "Ajustement cognitifs" },
   { name: "ÉPREUVES", subtitle: "Résistance mentale" },
   { name: "ACTIVATION", subtitle: "Synchronisation sécurisée" },
   { name: "VALIDATION", subtitle: "Séquence finale" },
@@ -994,16 +994,9 @@ const ENIGMAS = [
     hint: "\"Life moves pretty fast...\" 🎬",
     title: "La légende"
   },
+  
   {
-    id: 3, type: "Interaction", format: "torch",
-    narrative: "ALERTE > Module optique compromis. Activation du flash requis pour débloquer le système.",
-    question: "Le système est plongé dans l'obscurité.\nAllumez la torche (flash) de votre téléphone pour réactiver le module.",
-    answer: ["ok"],
-    hint: "Appuyez sur le bouton pour activer le flash de votre téléphone. Si non supporté, utilisez le bouton de secours.",
-    title: "Et la lumière fut"
-  },
-  {
-    id: 4, type: "Rébus", format: "rebus",
+    id: 3, type: "Rébus", format: "rebus",
     narrative: "MODULE DÉCRYPTAGE > Séquence visuelle détectée. Interprétation requise.",
     question: "Déchiffrez ce rébus :",
     rebusItems: ["🐏", "➕", "♨️"],
@@ -1012,8 +1005,63 @@ const ENIGMAS = [
     hint: "La première image = un bélier (ram). La deuxième = chaud ?",
     title: "Symboles Cachés"
   },
+
+   {
+    id: 4, type: "Suite Logique", format: "text",
+    narrative: "MODULE LOGIQUE > Séquence numérique incomplète détectée. Analyse requise.",
+    question: "Complétez la suite :\n\n21  —  22  —  26  —  ?\n\nEntrez le nombre manquant.",
+    answer: ["5", "05"],
+    hint: "Pensez à des numéros de maillot célèbres du basket 🏀 (les Bulls par exemple...)",
+    title: "La Suite Mystère"
+  },
+  
   {
-    id: 5, type: "Audio Père Fouras", format: "audio",
+    id: 5, type: "Interaction", format: "torch",
+    narrative: "ALERTE > Module optique compromis. Activation du flash requis pour débloquer le système.",
+    question: "Le système est plongé dans l'obscurité.\nAllumez la torche (flash) de votre téléphone pour réactiver le module.",
+    answer: ["ok"],
+    hint: "Appuyez sur le bouton pour activer le flash de votre téléphone. Si non supporté, utilisez le bouton de secours.",
+    title: "Et la lumière fut"
+  },
+
+  {
+    id: 6, type: "Devinette", format: "text",
+    narrative: "MODULE ANALYTIQUE > Épreuve de raisonnement. Concentration maximale requise.",
+    question: "Tu es dans un bus qui part avec 6 passagers.\n\nÀ l'arrêt suivant, 3 montent et 2 descendent.\nAu suivant, 5 descendent et 4 montent.\n\nDe quelle couleur sont les yeux du chauffeur ?",
+    answer: ["noir", "marron", "noirs", "marrons", "brun", "bruns"],
+    hint: "Relisez la première phrase... QUI conduit le bus ? 👀",
+    title: "Le Piège du Bus"
+  },
+
+  {
+    id: 7, type: "Mathématiques", format: "text",
+    narrative: "MODULE CALCUL > Équation à résoudre. Précision requise.",
+    question: "J'ajoute 2 au produit de deux nombres consécutifs supérieurs à 0 et j'obtiens 14.\n\nQuels sont ces deux nombres ?\n(Répondez sous la forme : X et Y)",
+    answer: ["3 et 4", "3et4", "3,4", "3 4"],
+    hint: "? × (? + 1) + 2 = 14 → ? × (? + 1) = 12",
+    title: "L'Équation"
+  },
+
+  {
+    id: 8, type: "Devinette", format: "text",
+    narrative: "MODULE PHILOSOPHIQUE > Pensée abstraite requise.",
+    question: "Je suis toujours devant toi,\nMais tu ne peux jamais me rattraper.\nPlus tu avances, plus j'avance aussi.\n\nQui suis-je ?",
+    answer: ["futur", "le futur", "l'avenir", "avenir", "demain"],
+    hint: "Nombreux veulent y voir, d'autres veulent en revenir",
+    title: "L'Insaisissable"
+  },
+
+  {
+    id: 9, type: "Culture Antilles", format: "text",
+    narrative: "MODULE CULTUREL > Scan régional > Identité caribéenne.",
+    question: "Fabriqué à partir de canne à sucre,\nje suis l'âme des Antilles.\nAgricole ou industriel,\nvieux ou blanc, je suis incontournable.\n\nQui suis-je ?",
+    answer: ["rhum", "le rhum", "rum"],
+    hint: "C'est une boisson spiritueuse emblématique de la Guadeloupe 🥃",
+    title: "L'Or des Antilles"
+  },
+  
+  {
+    id: 10, type: "Audio Père Fouras", format: "audio",
     audioId: "fouras-audio",
     hasWave: true,
     hasSpeedControl: true,
@@ -1024,8 +1072,44 @@ const ENIGMAS = [
     hint: "C'est une île française des Antilles en forme de papillon 🦋",
     title: "Transmission Brouillée"
   },
+
   {
-    id: 6, type: "Position GPS", format: "gps",
+    id: 11, type: "Faux Bug", format: "fakebug",
+    narrative: "", question: "",
+    answer: ["ok"],
+    hint: "Patience... le système va se rétablir 😏",
+    title: "/// ERREUR SYSTÈME ///"
+  },
+
+  {
+    id: 12, type: "Devinette", format: "text",
+    narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
+    question: "Un homme regarde un portrait et dit :\n\n« Je n'ai ni frère ni sœur, mais le père de cet homme est le fils de mon père. »\n\nQui est la personne sur le portrait ?",
+    answer: ["son fils", "fils", "mon fils"],
+    hint: "\"Le fils de mon père\" = moi-même (puisqu'il n'a ni frère ni sœur)...",
+    title: "Le Portrait"
+  },
+
+  {
+    id: 13, type: "Suite logique gourmande", format: "text",
+    narrative: "MODULE LOGIQUE > Séquence numérique incomplète détectée. Analyse requise.",
+    question: "Trouvez le résultat :\n\n🍟  -  8  -  9  -  1\n1  -  9  -🍔-  1\n0  -  2  -  0  -  2\n2  -  0  -  1  -  🍪\n🍕-  2  -  0  -  2\n\n🍔  x  🍕  +  🍪 - 2 x 🍟 = ?",
+    answer: ["5", "05"],
+    hint: "Vois-tu les années ?",
+    title: "La Faim"
+  },
+
+  {
+    id: 14, type: "Code", format: "keypad",
+    narrative: "MODULE SÉCURITÉ > Code d'accès requis. 4 chiffres. Aucune erreur tolérée.",
+    question: "Entrez le code d'activation.\n\nIndice : L'année de naissance de l'agent.",
+    answer: ["1986"],
+    hint: "L'année où tout a commencé... 🎂",
+    title: "Code d'Activation"
+  },
+  
+  {
+    id: 15, type: "Position GPS", format: "gps",
     narrative: "MODULE GPS > Signal crypté détecté. Déplacement physique requis pour décoder.",
     question: "Un signal a été localisé. Déplacez-vous jusqu'à la zone cible pour décrypter le message secret.",
     gpsTarget: { lat: 48.10789, lng: -1.67782 },
@@ -1035,55 +1119,14 @@ const ENIGMAS = [
     hint: "Approchez-vous du point cible... le radar vous guide !",
     title: "Signal Localisé"
   },
-  {
-    id: 7, type: "Suite Logique", format: "text",
-    narrative: "MODULE LOGIQUE > Séquence numérique incomplète détectée. Analyse requise.",
-    question: "Complétez la suite :\n\n21  —  22  —  26  —  ?\n\nEntrez le nombre manquant.",
-    answer: ["5", "05"],
-    hint: "Pensez à des numéros de maillot célèbres du basket 🏀 (les Bulls par exemple...)",
-    title: "La Suite Mystère"
-  },
-  {
-    id: 8, type: "Devinette", format: "text",
-    narrative: "MODULE ANALYTIQUE > Épreuve de raisonnement. Concentration maximale requise.",
-    question: "Tu es dans un bus qui part avec 6 passagers.\n\nÀ l'arrêt suivant, 3 montent et 2 descendent.\nAu suivant, 5 descendent et 4 montent.\n\nDe quelle couleur sont les yeux du chauffeur ?",
-    answer: ["noir", "marron", "noirs", "marrons", "brun", "bruns"],
-    hint: "Relisez la première phrase... QUI conduit le bus ? 👀",
-    title: "Le Piège du Bus"
-  },
+ 
+  
 
-  // ── ACTE 2 : CALIBRATION (8-15) ──
-  {
-    id: 9, type: "Devinette", format: "text",
-    narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
-    question: "Un homme regarde un portrait et dit :\n\n« Je n'ai ni frère ni sœur, mais le père de cet homme est le fils de mon père. »\n\nQui est la personne sur le portrait ?",
-    answer: ["son fils", "fils", "mon fils"],
-    hint: "\"Le fils de mon père\" = moi-même (puisqu'il n'a ni frère ni sœur)...",
-    title: "Le Portrait"
-  },
-  {
-    id: 10, type: "Mathématiques", format: "text",
-    narrative: "MODULE CALCUL > Équation à résoudre. Précision requise.",
-    question: "J'ajoute 2 au produit de deux nombres consécutifs supérieurs à 0 et j'obtiens 14.\n\nQuels sont ces deux nombres ?\n(Répondez sous la forme : X et Y)",
-    answer: ["3 et 4", "3et4", "3,4", "3 4"],
-    hint: "? × (? + 1) + 2 = 14 → ? × (? + 1) = 12",
-    title: "L'Équation"
-  },
-  {
-    id: 11, type: "Devinette", format: "text",
-    narrative: "MODULE PHILOSOPHIQUE > Pensée abstraite requise.",
-    question: "Je suis toujours devant toi,\nMais tu ne peux jamais me rattraper.\nPlus tu avances, plus j'avance aussi.\n\nQui suis-je ?",
-    answer: ["futur", "le futur", "l'avenir", "avenir", "demain"],
-    hint: "Nombreux veulent y voir, d'autres veulent en revenir",
-    title: "L'Insaisissable"
-  },
-  {
-    id: 12, type: "Faux Bug", format: "fakebug",
-    narrative: "", question: "",
-    answer: ["ok"],
-    hint: "Patience... le système va se rétablir 😏",
-    title: "/// ERREUR SYSTÈME ///"
-  },
+
+  
+  
+  
+  
   {
     id: 13, type: "Scan NFC", format: "nfc",
     narrative: "MODULE NFC > Tag détecté à proximité. Approchez votre appareil.",
@@ -1092,30 +1135,9 @@ const ENIGMAS = [
     hint: "Maintenez votre doigt sur la zone de scan pendant 3 secondes.",
     title: "Signal Fantôme"
   },
-  {
-    id: 14, type: "Culture Antilles", format: "text",
-    narrative: "MODULE CULTUREL > Scan régional > Identité caribéenne.",
-    question: "Fabriqué à partir de canne à sucre,\nje suis l'âme des Antilles.\nAgricole ou industriel,\nvieux ou blanc, je suis incontournable.\n\nQui suis-je ?",
-    answer: ["rhum", "le rhum", "rum"],
-    hint: "C'est une boisson spiritueuse emblématique de la Guadeloupe 🥃",
-    title: "L'Or des Antilles"
-  },
-  {
-    id: 15, type: "Code", format: "keypad",
-    narrative: "MODULE SÉCURITÉ > Code d'accès requis. 4 chiffres. Aucune erreur tolérée.",
-    question: "Entrez le code d'activation.\n\nIndice : L'année de naissance de l'agent.",
-    answer: ["1986"],
-    hint: "L'année où tout a commencé... 🎂",
-    title: "Code d'Activation"
-  },
-  {
-    id: 16, type: "Suite logique gourmande", format: "text",
-    narrative: "MODULE LOGIQUE > Séquence numérique incomplète détectée. Analyse requise.",
-    question: "Trouvez le résultat :\n\n🍟  -  8  -  9  -  1\n1  -  9  -🍔-  1\n0  -  2  -  0  -  2\n2  -  0  -  1  -  🍪\n🍕-  2  -  0  -  2\n\n🍔  x  🍕  +  🍪 - 2 x 🍟 = ?",
-    answer: ["5", "05"],
-    hint: "Vois-tu les années ?",
-    title: "La Faim"
-  },
+  
+  
+  
 
   // ── ACTE 3 : ÉPREUVES (16-23) ──
   {
@@ -1242,6 +1264,33 @@ const ENIGMAS = [
     answer: ["d'abord les copains"],
     hint: "A vo cat",
     title: "Lalala"
+  },
+
+  {
+    id: 31, type: "Histoire", format: "text",
+    narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
+    question: "Je nettoie quand il pleut,\n\nMais ce jour-là, j'atais au mauvais endroit.\n\nOn m'a monté puis démonté... pour rien\n\nQui suis-je ?",
+    answer: ["essuie glaces,essuie-glaces"],
+    hint: "",
+    title: "Humide"
+  },
+  
+  {
+    id: 32, type: "Histoire", format: "text",
+    narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
+    question: "Dans un lieu de nuit\n\nUn simple geste a été refusé\n\nQui possède cette exclusivité ?",
+    answer: ["mamie, grand mère,grand-mère"],
+    hint: "",
+    title: "Geste"
+  },
+
+  {
+    id: 33, type: "Histoire", format: "text",
+    narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
+    question: "Je pousse chez beaucoup\n\nMais je peux me faire attendre\n\nJe suis mois nourri que ton espoir de m'avoir\n\nQui suis-je ?",
+    answer: ["barbe"],
+    hint: "",
+    title: "Hope"
   },
 
   // ── ACTE 5 : VALIDATION (32-39) ──
