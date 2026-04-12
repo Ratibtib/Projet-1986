@@ -1254,7 +1254,7 @@ const ENIGMAS = [
     id: 30, type: "Cadena", format: "text",
     narrative: "MODULE logique > Un code a été dissimulé sur un document physique. Sauras-tu le révéler.",
     image2: "icons/cadenacryptex.png",
-    iframe: "https://lockee.fr/o/iR33Tu2z?noft",    
+    iframe2: "https://lockee.fr/o/iR33Tu2z?noft",    
     question: "",
     answer: ["Ace ventura"],
     hint: "C'est mort ! A toi de trouver !",
@@ -1582,7 +1582,7 @@ function renderEnigmaScreen(idx) {
   if (e.image2) {
     const img = document.createElement("img");
     img.src = e.image2;
-    img.style.maxWidth = "50%";
+    img.style.maxWidth = "70%";
     img.style.margin = "16px 0";
     body.appendChild(img);
   }
@@ -1592,6 +1592,16 @@ function renderEnigmaScreen(idx) {
     iframe.src = e.iframe;
     iframe.width = "100%";
     iframe.height = "60%";
+    iframe.style.border = "none";
+    iframe.style.margin = "0px 0";
+    body.appendChild(iframe);
+  }
+
+   if (e.iframe2) {
+    const iframe = document.createElement("iframe");
+    iframe.src = e.iframe2;
+    iframe.width = "60%";
+    iframe.height = "50%";
     iframe.style.border = "none";
     iframe.style.margin = "0px 0";
     body.appendChild(iframe);
