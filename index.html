@@ -1253,7 +1253,7 @@ const ENIGMAS = [
   {
     id: 30, type: "Cadena", format: "text",
     narrative: "MODULE logique > Un code a été dissimulé sur un document physique. Sauras-tu le révéler.",
-    image: "icons/cadenacryptex.png",
+    image2: "icons/cadenacryptex.png",
     iframe: "https://lockee.fr/o/iR33Tu2z",    
     question: "",
     answer: ["Ace ventura"],
@@ -1575,6 +1575,14 @@ function renderEnigmaScreen(idx) {
     const img = document.createElement("img");
     img.src = e.image;
     img.style.maxWidth = "100%";
+    img.style.margin = "16px 0";
+    body.appendChild(img);
+  }
+  
+  if (e.image2) {
+    const img = document.createElement("img");
+    img.src = e.image;
+    img.style.maxheight = "150px";
     img.style.margin = "16px 0";
     body.appendChild(img);
   }
