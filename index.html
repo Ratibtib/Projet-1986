@@ -1216,6 +1216,7 @@ const ENIGMAS = [
     id: 27, type: "Scan NFC", format: "nfc",
     narrative: "MODULE NFC > Tag détecté à proximité. Approchez votre appareil.",
     question: "Un tag NFC a été détecté.\nApprochez votre téléphone de la zone de scan.\n\n(En maquette : appuyez longuement sur la zone)",
+    nfcTagId: "04:EE:01:0A:30:1F:94",  // remplace par le serial number de ta puce
     answer: ["ok"],
     hint: "Maintenez votre doigt sur la zone de scan pendant 3 secondes.",
     title: "Signal Fantôme"
@@ -2415,23 +2416,72 @@ window.flipCamera = function() {
 
 // ═══════════════════════ NFC ═══════════════════════
 function renderNFC(container, idx) {
+  const e = ENIGMAS[idx]; // pour accéder à e.nfcTagId
   const zone = document.createElement('div');
   zone.className = 'nfc-zone';
-  zone.innerHTML = `<div class="nfc-icon">📡</div><div class="nfc-label">ZONE DE SCAN NFC</div>`;
-  let timer = null, holding = false;
-  function startScan() {
-    holding = true; zone.classList.add('scanning');
-    zone.querySelector('.nfc-label').textContent = 'SCAN EN COURS...';
-    playTone(440,.1);
-    timer = setTimeout(() => {
-      if (holding) { zone.querySelector('.nfc-label').textContent = 'TAG DÉTECTÉ ✓'; playSuccess(); setTimeout(()=>solveEnigma(idx),800); }
-    }, 3000);
+  zone.innerHTML = `<div class="nfc-icon">📡</div><div class="nfc-label">APPUYEZ POUR SCANNER</div>`;
+
+  // Vérifier si Web NFC est supporté
+  if (!('NDEFReader' in window)) {
+    // Fallback : ancien comportement (appui long)
+    zone.innerHTML += `<div style="font-size:.5rem;color:var(--warn);margin-top:8px;">NFC non supporté — appui long pour simuler</div>`;
+    let timer = null, holding = false;
+    function startScan() {
+      holding = true; zone.classList.add('scanning');
+      timer = setTimeout(() => { if (holding) { playSuccess(); setTimeout(()=>solveEnigma(idx),800); } }, 3000);
+    }
+    function stopScan() { holding = false; if(timer)clearTimeout(timer); zone.classList.remove('scanning'); }
+    zone.addEventListener('touchstart', (ev)=>{ev.preventDefault();startScan();});
+    zone.addEventListener('touchend', stopScan);
+    zone.addEventListener('mousedown', startScan);
+    zone.addEventListener('mouseup', stopScan);
+    container.appendChild(zone);
+    return;
   }
-  function stopScan() { holding = false; if(timer)clearTimeout(timer); zone.classList.remove('scanning'); zone.querySelector('.nfc-label').textContent = 'ZONE DE SCAN NFC'; }
-  zone.addEventListener('mousedown', startScan);
-  zone.addEventListener('mouseup', stopScan);
-  zone.addEventListener('touchstart', (e)=>{e.preventDefault();startScan();});
-  zone.addEventListener('touchend', stopScan);
+
+  // Vrai scan NFC
+  zone.addEventListener('click', async () => {
+    zone.classList.add('scanning');
+    zone.querySelector('.nfc-label').textContent = 'APPROCHEZ LE TAG...';
+    playTone(440, .1);
+
+    try {
+      const ndef = new NDEFReader();
+      await ndef.scan();
+
+      ndef.onreading = (event) => {
+        const tagId = event.serialNumber; // ex: "04:a2:3b:..."
+        console.log('Tag détecté:', tagId);
+
+        if (tagId.toLowerCase() === e.nfcTagId.toLowerCase()) {
+          // BON TAG
+          zone.classList.remove('scanning');
+          zone.querySelector('.nfc-icon').textContent = '✅';
+          zone.querySelector('.nfc-label').textContent = 'TAG VÉRIFIÉ ✓';
+          playSuccess();
+          setTimeout(() => solveEnigma(idx), 1000);
+        } else {
+          // MAUVAIS TAG
+          zone.querySelector('.nfc-label').textContent = 'MAUVAIS TAG ✗';
+          playError();
+          setTimeout(() => {
+            zone.querySelector('.nfc-label').textContent = 'RÉESSAYEZ...';
+          }, 2000);
+        }
+      };
+
+      ndef.onreadingerror = () => {
+        zone.querySelector('.nfc-label').textContent = 'ERREUR DE LECTURE';
+        playError();
+      };
+
+    } catch (err) {
+      console.error('NFC error:', err);
+      zone.classList.remove('scanning');
+      zone.querySelector('.nfc-label').textContent = 'NFC REFUSÉ';
+    }
+  });
+
   container.appendChild(zone);
 }
 
