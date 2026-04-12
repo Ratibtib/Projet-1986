@@ -1698,7 +1698,7 @@ function renderLightDetect(container, idx) {
           <span style="font-size:.5rem;color:var(--text-dim)"><!></span>`;
 
         // Si la luminosité augmente de +80 par rapport à la base → détecté
-        if (avg > baseBrightness + 40) {
+        if (avg > baseBrightness + 80) {
           detected = true;
           clearInterval(interval);
           stream.getTracks().forEach(t => t.stop());
