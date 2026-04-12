@@ -1648,8 +1648,8 @@ function renderLightDetect(container, idx) {
   // ── Détection par caméra ──
   function startBrightnessDetection() {
     zone.classList.add('active');
-    zone.querySelector('.torch-label').textContent = 'CAPTEUR CAMÉRA ACTIF...';
-    status.innerHTML = 'Utilisation de la caméra pour détecter la lumière...<br><span style="font-size:.5rem;color:var(--text-dim)"><!></span>';
+    zone.querySelector('.torch-label').textContent = '...';
+    status.innerHTML = 'Utilisation de la caméra...<br><span style="font-size:.5rem;color:var(--text-dim)"><!></span>';
 
     const video = document.createElement('video');
     video.setAttribute('autoplay', '');
@@ -1690,11 +1690,11 @@ function renderLightDetect(container, idx) {
         if (samples.length < 10) {
           samples.push(avg);
           baseBrightness = samples.reduce((a,b) => a+b, 0) / samples.length;
-          status.innerHTML = `Calibration... <span style="color:var(--accent)">${Math.round(avg)}/255</span>`;
+          status.innerHTML = `Calibration... <span style="color:var(--accent)">${Math.round(avg)}/${Math.round(baseBrightness)+80}</span>`;
           return;
         }
 
-        status.innerHTML = `Luminosité : <span style="color:var(--accent)">${Math.round(avg)}/${Math.round(baseBrightness)+40}</span> (base: ${Math.round(baseBrightness)})<br>
+        status.innerHTML = `Luminosité : <span style="color:var(--accent)">${Math.round(avg)}/${Math.round(baseBrightness)+80}</span> (base: ${Math.round(baseBrightness)})<br>
           <span style="font-size:.5rem;color:var(--text-dim)"><!></span>`;
 
         // Si la luminosité augmente de +80 par rapport à la base → détecté
