@@ -1109,15 +1109,16 @@ const ENIGMAS = [
     title: "La machine"
   },
 
-  {
-    id: 14, type: "???", format: "text",
-    narrative: "???",
-    question: "???",
-    answer: ["???"],
-    hint: "???",
-    title: "???"
+   {
+    id: 15, type: "Devinette", format: "text",
+    narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
+    iframe: "https://scape.enepe.fr/ressources/cesar/index2.html",
+    question: "🥑 - AVOCAT - 🥑\n\nex kfymkd ocd ex pbesd ybsqsxksbo ne wohsaeo.",
+    answer: ["un avocat est un fruit originaire du mexique"],
+    hint: "A vo cat",
+    title: "Avocat"
   },
-  
+
   {
     id: 16, type: "Position GPS", format: "gps",
     narrative: "MODULE GPS > Signal crypté détecté. Déplacement physique requis pour décoder.",
@@ -1195,23 +1196,24 @@ const ENIGMAS = [
   },
 
   {
-    id: 24, type: "Vision Secrète", format: "camera",
-    narrative: "MODULE OPTIQUE > Un message a été dissimulé sur un document physique. Seul un filtre spécial peut le révéler.",
-    question: "Un agent a caché un message sur un document imprimé.\n\nActivez le filtre rouge de votre caméra, puis pointez-la vers le document pour lire le mot secret.",
-    answer: ["cadeau", "le cadeau"],
-    hint: "Regardez bien à travers le filtre rouge... le texte bleu disparaît, le message caché apparaît !",
-    title: "L'Œil Rouge"
-  },
-
-  {
-    id: 25, type: "Histoire", format: "text",
+    id: 24, type: "Histoire", format: "text",
     narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
     question: "Dans un lieu de nuit\n\nUn simple geste a été refusé\n\nQui possède cette exclusivité ?",
     answer: ["mamie, grand mère,grand-mère"],
     hint: "",
     title: "Geste"
   },
-  
+
+  {
+    id: 25, type: "Scan NFC", format: "nfc",
+    narrative: "MODULE NFC > Tag détecté à proximité. Approchez votre appareil.",
+    question: "<!> Alerte sécurité <!> \n\n Scanne de vérification obligatoire",
+    nfcTagId: "04:EE:01:0A:30:1F:94",  // remplace par le serial number de ta puce
+    answer: ["ok"],
+    hint: "Maintenez votre doigt sur la zone de scan pendant 3 secondes.",
+    title: "Signal Fantôme"
+  },
+
   {
     id: 26, type: "Devinette", format: "text",
     narrative: "MODULE PHILOSOPHIQUE > Pensée abstraite requise.",
@@ -1222,27 +1224,16 @@ const ENIGMAS = [
   },
 
    {
-    id: 27, type: "Scan NFC", format: "nfc",
-    narrative: "MODULE NFC > Tag détecté à proximité. Approchez votre appareil.",
-    question: "<!> Alerte sécurité <!> \n\n Scanne de vérification obligatoire",
-    nfcTagId: "04:EE:01:0A:30:1F:94",  // remplace par le serial number de ta puce
-    answer: ["ok"],
-    hint: "Maintenez votre doigt sur la zone de scan pendant 3 secondes.",
-    title: "Signal Fantôme"
+    id: 27, type: "???", format: "text",
+    narrative: "???",
+    question: "???",
+    answer: ["???"],
+    hint: "???",
+    title: "???"
   },
- 
-   {
-    id: 28, type: "Devinette", format: "text",
-    narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
-    iframe: "https://scape.enepe.fr/ressources/cesar/index2.html",
-    question: "🥑 - AVOCAT - 🥑\n\nex kfymkd ocd ex pbesd ybsqsxksbo ne wohsaeo.",
-    answer: ["un avocat est un fruit originaire du mexique"],
-    hint: "A vo cat",
-    title: "Avocat"
-  },
-
+  
   {
-    id: 29, type: "Souvenir", format: "text",
+    id: 28, type: "Souvenir", format: "text",
     narrative: "MODULE mémoire > Niveau 3 > Capacité de mémorisation avancée.",
     image: "icons/jetpack.gif",
     question: "",
@@ -1252,7 +1243,7 @@ const ENIGMAS = [
   },
   
   {
-    id: 30, type: "Cadena", format: "text",
+    id: 29, type: "Cadena", format: "text",
     narrative: "MODULE logique > Un code a été dissimulé sur un document physique. Sauras-tu le révéler.",
     image2: "icons/cadenacryptex.png",
     iframe2: "https://lockee.fr/o/iR33Tu2z?noft",    
@@ -1263,12 +1254,21 @@ const ENIGMAS = [
   },
   
   {
-    id: 31, type: "Code", format: "keypad",
+    id: 30, type: "Code", format: "keypad",
     narrative: "MODULE SÉCURITÉ > Code d'accès requis. 4 chiffres. Aucune erreur tolérée.",
-    question: "Entrez le code d'activation.\n\nIndice : L'année de naissance de l'agent.",
-    answer: ["1986"],
-    hint: "L'année où tout a commencé... 🎂",
+    question: "Entrez le code d'activation.",
+    answer: ["3827"],
+    hint: "🔊🔊🔊🔊",
     title: "Code d'Activation"
+  },
+
+   {
+    id: 31, type: "Vision Secrète", format: "camera",
+    narrative: "MODULE OPTIQUE > Un message a été dissimulé sur un document physique. Seul un filtre spécial peut le révéler.",
+    question: "Un agent a caché un message sur un document imprimé.\n\nActivez le filtre rouge de votre caméra, puis pointez-la vers le document pour lire le mot secret.",
+    answer: ["cadeau", "le cadeau"],
+    hint: "Regardez bien à travers le filtre rouge... le texte bleu disparaît, le message caché apparaît !",
+    title: "L'Œil Rouge"
   },
 
   {
@@ -1281,12 +1281,13 @@ const ENIGMAS = [
   },
 
   {
-    id: 33, type: "???", format: "text",
-    narrative: "???",
-    question: "???",
-    answer: ["???"],
-    hint: "???",
-    title: "???"
+    id: 33, type: "Labyrinthe", format: "text",
+    narrative: "MODULE calcul > Un code a été dissimulé sur un document physique. Seul le chemin du labyrinthe peut le révéler.",
+    image: "icons/labyrinthe_opp_c.png",
+    question: "",
+    answer: ["FY57X?N3PML90R6ID"],
+    hint: "F----[...]----D",
+    title: "La caltoch"
   },
   
   {
@@ -1295,7 +1296,7 @@ const ENIGMAS = [
     iframe: "https://lockee.fr/o/a3ds9RFX?noft",
     question: "A vous tous vous atteignez 288",
     answer: ["le prince de bel air"],
-    hint: "A vo cat",
+    hint: "288 ça fait vieux !",
     title: "Click"
   },
 
@@ -1319,22 +1320,22 @@ const ENIGMAS = [
   },
 
   {
-    id: 37, type: "???", format: "text",
+    id: 37, type: "Logique", format: "text",
+    narrative: "MODULE ACTION > Niveau 2 > Capacité de manipulation prolongée.",
+    iframe: "https://lockee.fr/o/4Y0EUfoe?noft",
+    question: "???",
+    answer: ["Le loft"],
+    hint: "Blanc b...",
+    title: "Box"
+  },
+  
+  {
+    id: 38, type: "???", format: "text",
     narrative: "???",
     question: "???",
     answer: ["???"],
     hint: "???",
     title: "???"
-  },
-  
-  {
-    id: 38, type: "Labyrinthe", format: "text",
-    narrative: "MODULE calcul > Un code a été dissimulé sur un document physique. Seul le chemin du labyrinthe peut le révéler.",
-    image: "icons/labyrinthe_opp_c.png",
-    question: "",
-    answer: ["FY57X?N3PML90R6ID"],
-    hint: "F----[...]----D",
-    title: "La caltoch"
   },
 
   {
