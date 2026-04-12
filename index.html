@@ -1468,14 +1468,7 @@ function getActForIndex(idx) {
 
 function renderHub() {
   const container = document.getElementById('acts-container');
-  container.innerHTML = '';
-  container.style.display = "flex";
-  container.style.justifyContent = "center";
-  container.style.alignItems = "center";
-  container.style.height = "100vh";
-  container.appendChild(iframe);
-  document.body.appendChild(container);
-  
+  container.innerHTML = '';  
   const solved = STATE.solved.length;
   document.getElementById('progress-text').textContent = `${solved}/${TOTAL}`;
   document.getElementById('progress-bar').style.width = `${(solved/TOTAL)*100}%`;
