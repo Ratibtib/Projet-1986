@@ -1647,76 +1647,81 @@ function renderLightDetect(container, idx) {
 
   // ── Détection par caméra ──
   function startBrightnessDetection() {
-    zone.classList.add('active');
-    zone.querySelector('.torch-label').textContent = '...';
-    status.innerHTML = 'Utilisation de la caméra...<br><span style="font-size:.5rem;color:var(--text-dim)"><!></span>';
+  zone.classList.add('active');
+  zone.querySelector('.torch-label').textContent = 'CAPTEUR ACTIF...';
+  status.innerHTML = 'Allumez votre torche manuellement puis patientez...';
 
-    const video = document.createElement('video');
-    video.setAttribute('autoplay', '');
-    video.setAttribute('playsinline', '');
-    video.setAttribute('muted', '');
-    video.style.display = 'none';
-    document.body.appendChild(video);
+  const canvas = document.createElement('canvas');
+  canvas.width = 64; canvas.height = 64;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-    const canvas = document.createElement('canvas');
-    canvas.width = 64; canvas.height = 64; // petite résolution suffit
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  let baseBrightness = null;
+  let samples = [];
 
-    navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: 64, height: 64 },
-      audio: false
-    }).then(stream => {
+  async function snapAndMeasure() {
+    if (detected) return;
+
+    let stream;
+    try {
+      // Ouvre la caméra arrière
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: 64, height: 64 },
+        audio: false
+      });
+
+      const video = document.createElement('video');
+      video.setAttribute('autoplay', '');
+      video.setAttribute('playsinline', '');
+      video.setAttribute('muted', '');
       video.srcObject = stream;
-      video.play();
+      await video.play();
 
-      // Calibration : moyenne initiale sur 1s
-      let baseBrightness = null;
-      let samples = [];
+      // Attend 1 frame pour que l'image soit prête
+      await new Promise(r => setTimeout(r, 300));
 
-      const interval = setInterval(() => {
-        if (detected) { clearInterval(interval); stream.getTracks().forEach(t=>t.stop()); video.remove(); return; }
+      // Capture
+      ctx.drawImage(video, 0, 0, 64, 64);
+      const data = ctx.getImageData(0, 0, 64, 64).data;
 
-        ctx.drawImage(video, 0, 0, 64, 64);
-        const data = ctx.getImageData(0, 0, 64, 64).data;
+      // Ferme immédiatement la caméra → libère le flash
+      stream.getTracks().forEach(t => t.stop());
+      video.remove();
 
-        // Calcul luminosité moyenne
-        let sum = 0;
-        for (let i = 0; i < data.length; i += 4) {
-          sum += (data[i] + data[i+1] + data[i+2]) / 3;
-        }
-        const avg = sum / (64 * 64);
+      // Calcul luminosité moyenne
+      let sum = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        sum += (data[i] + data[i+1] + data[i+2]) / 3;
+      }
+      const avg = sum / (64 * 64);
 
-        // Calibration pendant les 2 premières secondes
-        if (samples.length < 10) {
-          samples.push(avg);
-          baseBrightness = samples.reduce((a,b) => a+b, 0) / samples.length;
-          status.innerHTML = `Calibration... <span style="color:var(--accent)">${Math.round(avg)}/${Math.round(baseBrightness)+80}</span>`;
+      // Calibration (premières mesures)
+      if (samples.length < 3) {
+        samples.push(avg);
+        baseBrightness = samples.reduce((a, b) => a + b, 0) / samples.length;
+        status.innerHTML = `Calibration... <span style="color:var(--accent)">${Math.round(avg)}/255</span>`;
+      } else {
+        status.innerHTML = `Luminosité : <span style="color:var(--accent)">${Math.round(avg)}/255</span> (base: ${Math.round(baseBrightness)})<br>
+          <span style="font-size:.5rem;color:var(--text-dim)">Allumez votre torche maintenant</span>`;
+
+        if (avg > baseBrightness + 60) {
+          detected = true;
+          onLightDetected();
           return;
         }
+      }
 
-        status.innerHTML = `Luminosité : <span style="color:var(--accent)">${Math.round(avg)}/${Math.round(baseBrightness)+80}</span> (base: ${Math.round(baseBrightness)})<br>
-          <span style="font-size:.5rem;color:var(--text-dim)"><!></span>`;
+      // Attend 2s (flash libre pendant ce temps) puis recommence
+      setTimeout(snapAndMeasure, 2000);
 
-        // Si la luminosité augmente de +80 par rapport à la base → détecté
-        if (avg > baseBrightness + 80) {
-          detected = true;
-          clearInterval(interval);
-          stream.getTracks().forEach(t => t.stop());
-          video.remove();
-          onLightDetected();
-        }
-      }, 200);
-
-      // Fallback après 30s si rien détecté
-      setTimeout(() => {
-        if (!detected) showFallback();
-      }, 30000);
-
-    }).catch(err => {
-      console.error('Camera brightness detection failed:', err);
+    } catch (err) {
+      console.error('Snap error:', err);
+      if (stream) stream.getTracks().forEach(t => t.stop());
       showFallback();
-    });
+    }
   }
+
+  snapAndMeasure();
+}
 
   function onLightDetected() {
     zone.classList.remove('active');
