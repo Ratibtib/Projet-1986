@@ -1291,7 +1291,7 @@ const ENIGMAS = [
   {
     id: 34, type: "Cadena", format: "text",
     narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
-    iframe: "https://lockee.fr/o/a3ds9RFX",
+    iframe: "https://lockee.fr/o/a3ds9RFX?noft",
     question: "A vous tous vous atteignez 288",
     answer: ["le prince de bel air"],
     hint: "A vo cat",
@@ -1590,8 +1590,8 @@ function renderEnigmaScreen(idx) {
   if (e.iframe) {
     const iframe = document.createElement("iframe");
     iframe.src = e.iframe;
-    iframe.width = "100%";
-    iframe.height = "60%";
+    iframe.width = "220px";
+    iframe.height = "100%";
     iframe.style.border = "none";
     iframe.style.margin = "0px 0";
     body.appendChild(iframe);
