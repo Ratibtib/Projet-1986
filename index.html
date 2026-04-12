@@ -1663,7 +1663,7 @@ function renderLightDetect(container, idx) {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
     navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: 64, height: 64 },
+      video: { facingMode: 'user', width: 64, height: 64 },
       audio: false
     }).then(stream => {
       video.srcObject = stream;
@@ -1698,7 +1698,7 @@ function renderLightDetect(container, idx) {
           <span style="font-size:.5rem;color:var(--text-dim)">Allumez votre torche manuellement</span>`;
 
         // Si la luminosité augmente de +80 par rapport à la base → détecté
-        if (avg > baseBrightness + 80) {
+        if (avg > baseBrightness + 40) {
           detected = true;
           clearInterval(interval);
           stream.getTracks().forEach(t => t.stop());
