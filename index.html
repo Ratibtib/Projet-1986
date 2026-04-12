@@ -1688,7 +1688,7 @@ function renderLightDetect(container, idx) {
       for (let i = 0; i < data.length; i += 4) {
         if (data[i] > 245 && data[i + 1] > 245 && data[i + 2] > 245) saturated++;
       }
-      const saturatedPct = saturated / (64 * 64) * 100;
+      const saturatedPct = saturated / 255;
 
       status.innerHTML = `Luminosité : <span style="color:var(--accent)">${Math.round(avg)}/255</span> (base: ${Math.round(baseBrightness)})<br>
         Saturation : <span style="color:var(--accent)">${Math.round(saturatedPct)}%</span><br>
