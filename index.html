@@ -1196,16 +1196,28 @@ const ENIGMAS = [
   },
 
   {
-    id: 24, type: "Histoire", format: "text",
-    narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
-    question: "Dans un lieu de nuit\n\nUn simple geste a été refusé\n\nQui possède cette exclusivité ?",
-    answer: ["mamie, grand mère,grand-mère"],
-    hint: "",
-    title: "Geste"
+    id: 24, type: "Position GPS", format: "gps",
+    narrative: "MODULE GPS > Signal crypté détecté. Déplacement physique requis pour décoder.",
+    question: "Un signal a été localisé. Déplacez-vous jusqu'à la zone cible pour décrypter le message secret.",
+    gpsTarget: { lat: 48.10789, lng: -1.67782 },
+    gpsRadius: 500,
+    gpsSecret: "OMBRE",
+    answer: ["ombre", "l'ombre"],
+    hint: "Approchez-vous du point cible... le radar vous guide !",
+    title: "Signal Localisé"
   },
-
+  
+   {
+    id: 25, type: "???", format: "text",
+    narrative: "???",
+    question: "???",
+    answer: ["???"],
+    hint: "???",
+    title: "???"
+  },
+  
   {
-    id: 25, type: "Scan NFC", format: "nfc",
+    id: 26, type: "Scan NFC", format: "nfc",
     narrative: "MODULE NFC > Tag détecté à proximité. Approchez votre appareil.",
     question: "<!> Alerte sécurité <!> \n\n Scanne de vérification obligatoire",
     nfcTagId: "04:EE:01:0A:30:1F:94",  // remplace par le serial number de ta puce
@@ -1215,7 +1227,7 @@ const ENIGMAS = [
   },
 
   {
-    id: 26, type: "Devinette", format: "text",
+    id: 27, type: "Devinette", format: "text",
     narrative: "MODULE PHILOSOPHIQUE > Pensée abstraite requise.",
     question: "Je suis toujours devant toi,\nMais tu ne peux jamais me rattraper.\nPlus tu avances, plus j'avance aussi.\n\nQui suis-je ?",
     answer: ["futur", "le futur", "l'avenir", "avenir", "demain"],
@@ -1224,7 +1236,7 @@ const ENIGMAS = [
   },
 
    {
-    id: 27, type: "???", format: "text",
+    id: 28, type: "???", format: "text",
     narrative: "???",
     question: "???",
     answer: ["???"],
@@ -1233,7 +1245,7 @@ const ENIGMAS = [
   },
   
   {
-    id: 28, type: "Souvenir", format: "text",
+    id: 29, type: "Souvenir", format: "text",
     narrative: "MODULE mémoire > Niveau 3 > Capacité de mémorisation avancée.",
     image: "icons/jetpack.gif",
     question: "",
@@ -1243,7 +1255,7 @@ const ENIGMAS = [
   },
   
   {
-    id: 29, type: "Cadena", format: "text",
+    id: 30, type: "Cadena", format: "text",
     narrative: "MODULE logique > Un code a été dissimulé sur un document physique. Sauras-tu le révéler.",
     image2: "icons/cadenacryptex.png",
     iframe2: "https://lockee.fr/o/iR33Tu2z?noft",    
@@ -1254,7 +1266,7 @@ const ENIGMAS = [
   },
   
   {
-    id: 30, type: "Code", format: "keypad",
+    id: 31, type: "Code", format: "keypad",
     narrative: "MODULE SÉCURITÉ > Code d'accès requis. 4 chiffres. Aucune erreur tolérée.",
     question: "Entrez le code d'activation.",
     answer: ["3827"],
@@ -1265,16 +1277,16 @@ const ENIGMAS = [
 
   //En ce lieux elle les a touchés, sans savoir qu’ils portaient déjà la promesse du temps, ce jour là, rien n’était blanc, pourtant tout avait commencé, qui suis je ?
    {
-    id: 31, type: "Vision Secrète", format: "camera",
+    id: 32, type: "Vision Secrète", format: "camera",
     narrative: "MODULE OPTIQUE > Un message a été dissimulé sur un document physique. Seul un filtre spécial peut le révéler.",
-    question: "Un agent a caché un message sur un document imprimé.\n\nActivez le filtre rouge de votre caméra, puis pointez-la vers le document pour lire le mot secret.",
-    answer: ["cadeau", "le cadeau"],
+    question: "Un agent a caché un message.\n\nTrouvez le mot secret.",
+    answer: ["le loft"],
     hint: "Regardez bien à travers les filtres...",
-    title: "L'Œil Rouge"
+    title: "L'Œil"
   },
 
   {
-    id: 32, type: "???", format: "text",
+    id: 33, type: "???", format: "text",
     narrative: "???",
     question: "???",
     answer: ["???"],
@@ -1283,7 +1295,7 @@ const ENIGMAS = [
   },
 
   {
-    id: 33, type: "Labyrinthe", format: "text",
+    id: 34, type: "Labyrinthe", format: "text",
     narrative: "MODULE calcul > Un code a été dissimulé sur un document physique. Seul le chemin du labyrinthe peut le révéler.",
     image: "icons/labyrinthe_opp_c.png",
     question: "",
@@ -1293,7 +1305,7 @@ const ENIGMAS = [
   },
   
   {
-    id: 34, type: "Cadena", format: "text",
+    id: 35, type: "Cadena", format: "text",
     narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
     iframe: "https://lockee.fr/o/a3ds9RFX?noft",
     question: "A vous tous vous atteignez 288",
@@ -1303,7 +1315,7 @@ const ENIGMAS = [
   },
 
   {
-    id: 35, type: "???", format: "text",
+    id: 36, type: "???", format: "text",
     narrative: "???",
     question: "???",
     answer: ["???"],
@@ -1312,7 +1324,7 @@ const ENIGMAS = [
   },
   
   {
-    id: 36, type: "Mots mélangés", format: "text",
+    id: 37, type: "Mots mélangés", format: "text",
     narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
     iframe: "https://ladigitale.dev/digilock/#/l/69dbf54b65713?vue=apercu",
     question: "Cherche et trouve",
@@ -1322,22 +1334,13 @@ const ENIGMAS = [
   },
 
   {
-    id: 37, type: "Logique", format: "text",
+    id: 38, type: "Logique", format: "text",
     narrative: "MODULE ACTION > Niveau 2 > Capacité de manipulation prolongée.",
     iframe: "https://lockee.fr/o/4Y0EUfoe?noft",
     question: "???",
     answer: ["Le loft"],
     hint: "Blanc b...",
     title: "Box"
-  },
-  
-  {
-    id: 38, type: "???", format: "text",
-    narrative: "???",
-    question: "???",
-    answer: ["???"],
-    hint: "???",
-    title: "???"
   },
 
   {
