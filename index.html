@@ -2419,7 +2419,7 @@ function renderNFC(container, idx) {
   const e = ENIGMAS[idx]; // pour accéder à e.nfcTagId
   const zone = document.createElement('div');
   zone.className = 'nfc-zone';
-  zone.innerHTML = `<div class="nfc-icon">📡</div><div class="nfc-label">APPUYEZ POUR SCANNER</div>`;
+  zone.innerHTML = `<div class="nfc-icon">📡</div><div class="nfc-label">APPUYEZ</div>`;
 
   // Vérifier si Web NFC est supporté
   if (!('NDEFReader' in window)) {
@@ -2442,7 +2442,7 @@ function renderNFC(container, idx) {
   // Vrai scan NFC
   zone.addEventListener('click', async () => {
     zone.classList.add('scanning');
-    zone.querySelector('.nfc-label').textContent = 'APPROCHEZ LE TAG...';
+    zone.querySelector('.nfc-label').textContent = 'Scannez';
     playTone(440, .1);
 
     try {
@@ -2457,7 +2457,7 @@ function renderNFC(container, idx) {
           // BON TAG
           zone.classList.remove('scanning');
           zone.querySelector('.nfc-icon').textContent = '✅';
-          zone.querySelector('.nfc-label').textContent = 'TAG VÉRIFIÉ ✓';
+          zone.querySelector('.nfc-label').textContent = 'TAG VÉRIFIÉ ✓ Bravo !';
           playSuccess();
           setTimeout(() => solveEnigma(idx), 1000);
         } else {
