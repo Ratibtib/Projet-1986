@@ -1033,7 +1033,7 @@ const ENIGMAS = [
   },
 
   {
-    id: 7, type: "Histoire", format: "text",
+    id: 7, type: "Histoire", format: "lightdetect",
     narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
     question: "Je pousse chez beaucoup\n\nMais je peux me faire attendre\n\nJe suis moins fournie que ton espoir de m'avoir\n\nQui suis-je ?",
     answer: ["barbe"],
@@ -1562,6 +1562,7 @@ function renderEnigmaScreen(idx) {
 
   switch (e.format) {
     case 'text': renderTextInput(body, idx); break;
+    case 'lightdetect': renderLightDetect(body, idx); break;
     case 'torch': renderTorch(body, idx); break;
     case 'rebus': renderRebus(body, idx); break;
     case 'audio': renderAudioPlayer(body, idx); break;
@@ -1573,6 +1574,177 @@ function renderEnigmaScreen(idx) {
   }
 }
 
+// ═══════════════════════ LIGHT DETECT ═══════════════════════
+  
+function renderLightDetect(container, idx) {
+  const module = document.createElement('div');
+  module.className = 'torch-module';
+  module.innerHTML = `
+    <div class="torch-zone" id="light-zone">
+      <div class="torch-icon">🔦</div>
+      <div class="torch-label">EN ATTENTE DE LUMIÈRE</div>
+    </div>
+    <div class="torch-status" id="light-status">
+      Allumez la torche de votre téléphone manuellement<br>
+      (via le centre de contrôle / notifications)
+    </div>
+    <div class="feedback-msg" id="feedback"></div>
+    <div id="light-fallback" style="display:none;margin-top:14px;">
+      <button class="torch-fallback-btn" id="light-fallback-btn">
+        🔦 J'AI ALLUMÉ MA TORCHE
+      </button>
+    </div>
+  `;
+  container.appendChild(module);
+
+  const zone = document.getElementById('light-zone');
+  const status = document.getElementById('light-status');
+  const feedback = document.getElementById('feedback');
+  let detected = false;
+
+  // Seuil de luminosité (en lux) — ajuste selon tes tests
+  const LUX_THRESHOLD = 500;
+
+  // ── OPTION A : AmbientLightSensor ──
+  if ('AmbientLightSensor' in window) {
+    try {
+      const sensor = new AmbientLightSensor();
+      sensor.addEventListener('reading', () => {
+        if (detected) return;
+
+        // Affiche la valeur pour debug
+        status.innerHTML = `Luminosité détectée : <span style="color:var(--accent)">${Math.round(sensor.illuminance)} lux</span><br>
+          <span style="font-size:.5rem;color:var(--text-dim)">Seuil : ${LUX_THRESHOLD} lux</span>`;
+
+        if (sensor.illuminance > LUX_THRESHOLD) {
+          detected = true;
+          sensor.stop();
+          onLightDetected();
+        }
+      });
+      sensor.addEventListener('error', (e) => {
+        console.error('Light sensor error:', e);
+        showFallback();
+      });
+      sensor.start();
+
+      zone.classList.add('active');
+      zone.querySelector('.torch-label').textContent = 'CAPTEUR ACTIF...';
+      return; // sensor OK, on sort
+    } catch (e) {
+      console.log('AmbientLightSensor failed:', e);
+    }
+  }
+
+  // ── OPTION B : Caméra avant (mesure brightness) ──
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    startBrightnessDetection();
+    return;
+  }
+
+  // ── Aucun capteur dispo → fallback manuel ──
+  showFallback();
+
+  // ── Détection par caméra ──
+  function startBrightnessDetection() {
+    zone.classList.add('active');
+    zone.querySelector('.torch-label').textContent = 'CAPTEUR CAMÉRA ACTIF...';
+    status.innerHTML = 'Utilisation de la caméra pour détecter la lumière...<br><span style="font-size:.5rem;color:var(--text-dim)">Allumez votre torche manuellement</span>';
+
+    const video = document.createElement('video');
+    video.setAttribute('autoplay', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('muted', '');
+    video.style.display = 'none';
+    document.body.appendChild(video);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 64; canvas.height = 64; // petite résolution suffit
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: 64, height: 64 },
+      audio: false
+    }).then(stream => {
+      video.srcObject = stream;
+      video.play();
+
+      // Calibration : moyenne initiale sur 1s
+      let baseBrightness = null;
+      let samples = [];
+
+      const interval = setInterval(() => {
+        if (detected) { clearInterval(interval); stream.getTracks().forEach(t=>t.stop()); video.remove(); return; }
+
+        ctx.drawImage(video, 0, 0, 64, 64);
+        const data = ctx.getImageData(0, 0, 64, 64).data;
+
+        // Calcul luminosité moyenne
+        let sum = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          sum += (data[i] + data[i+1] + data[i+2]) / 3;
+        }
+        const avg = sum / (64 * 64);
+
+        // Calibration pendant les 2 premières secondes
+        if (samples.length < 10) {
+          samples.push(avg);
+          baseBrightness = samples.reduce((a,b) => a+b, 0) / samples.length;
+          status.innerHTML = `Calibration... <span style="color:var(--accent)">${Math.round(avg)}/255</span>`;
+          return;
+        }
+
+        status.innerHTML = `Luminosité : <span style="color:var(--accent)">${Math.round(avg)}/255</span> (base: ${Math.round(baseBrightness)})<br>
+          <span style="font-size:.5rem;color:var(--text-dim)">Allumez votre torche manuellement</span>`;
+
+        // Si la luminosité augmente de +80 par rapport à la base → détecté
+        if (avg > baseBrightness + 80) {
+          detected = true;
+          clearInterval(interval);
+          stream.getTracks().forEach(t => t.stop());
+          video.remove();
+          onLightDetected();
+        }
+      }, 200);
+
+      // Fallback après 30s si rien détecté
+      setTimeout(() => {
+        if (!detected) showFallback();
+      }, 30000);
+
+    }).catch(err => {
+      console.error('Camera brightness detection failed:', err);
+      showFallback();
+    });
+  }
+
+  function onLightDetected() {
+    zone.classList.remove('active');
+    zone.classList.add('success');
+    zone.querySelector('.torch-icon').textContent = '✅';
+    zone.querySelector('.torch-label').textContent = 'LUMIÈRE DÉTECTÉE';
+    status.innerHTML = '<span style="color:var(--success)">✓ FLASH DÉTECTÉ — MODULE DÉVERROUILLÉ</span>';
+    feedback.className = 'feedback-msg success';
+    feedback.textContent = '✓ ACCÈS AUTORISÉ';
+    playSuccess();
+    setTimeout(() => solveEnigma(idx), 1500);
+  }
+
+  function showFallback() {
+    document.getElementById('light-fallback').style.display = 'block';
+    document.getElementById('light-fallback-btn').onclick = () => {
+      document.getElementById('light-fallback-btn').disabled = true;
+      document.getElementById('light-fallback-btn').textContent = '⏳ VÉRIFICATION...';
+      setTimeout(() => onLightDetected(), 1500);
+    };
+  }
+
+  // Toujours proposer le fallback en parallèle, après 5s
+  setTimeout(() => {
+    if (!detected) showFallback();
+  }, 5000);
+}
+  
 // ═══════════════════════ TEXT INPUT ═══════════════════════
 function renderTextInput(container, idx) {
   const section = document.createElement('div');
