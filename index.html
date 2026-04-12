@@ -1622,13 +1622,11 @@ function renderLightDetect(container, idx) {
     };
   }
 
-  // Vérifier support caméra
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     showFallback();
     return;
   }
 
-  // Lancer la détection
   zone.classList.add('active');
   zone.querySelector('.torch-label').textContent = 'CAPTEUR ACTIF...';
 
@@ -1665,14 +1663,13 @@ function renderLightDetect(container, idx) {
       ctx.drawImage(video, 0, 0, 64, 64);
       const data = ctx.getImageData(0, 0, 64, 64).data;
 
-      // Calcul luminosité moyenne
       let sum = 0;
       for (let i = 0; i < data.length; i += 4) {
         sum += (data[i] + data[i + 1] + data[i + 2]) / 3;
       }
       const avg = sum / (64 * 64);
 
-      // Phase de calibration (10 premières mesures)
+      // Calibration (10 premières mesures)
       if (samples.length < 10) {
         samples.push(avg);
         baseBrightness = samples.reduce((a, b) => a + b, 0) / samples.length;
@@ -1680,22 +1677,13 @@ function renderLightDetect(container, idx) {
         return;
       }
 
-      // Delta adaptatif selon luminosité ambiante
-      const delta = baseBrightness > 150 ? 25 : 60;
+      const target = Math.round(baseBrightness * 1.5);
 
-      // Comptage pixels saturés blancs (>245 sur R, G et B)
-      let saturated = 0;
-      for (let i = 0; i < data.length; i += 4) {
-        if (data[i] > 245 && data[i + 1] > 245 && data[i + 2] > 245) saturated++;
-      }
-      const saturatedPct = saturated / 255;
-
-      status.innerHTML = `Luminosité : <span style="color:var(--accent)">${Math.round(avg)}/255</span> (base: ${Math.round(baseBrightness)})<br>
-        Saturation : <span style="color:var(--accent)">${Math.round(saturatedPct)}%</span><br>
+      status.innerHTML = `Luminosité : <span style="color:var(--accent)">${Math.round(avg)}/255</span><br>
+        Objectif : <span style="color:var(--accent)">${target}/255</span><br>
         <span style="font-size:.5rem;color:var(--text-dim)">Pointez droit vers une lampe ou le soleil</span>`;
 
-      // Double condition : pic relatif ET saturation
-      if (avg > baseBrightness + delta && saturatedPct > 40) {
+      if (avg > baseBrightness * 1.5) {
         detected = true;
         clearInterval(interval);
         stream.getTracks().forEach(t => t.stop());
@@ -1704,7 +1692,6 @@ function renderLightDetect(container, idx) {
       }
     }, 200);
 
-    // Fallback après 30s
     setTimeout(() => {
       if (!detected) showFallback();
     }, 30000);
@@ -1714,7 +1701,6 @@ function renderLightDetect(container, idx) {
     showFallback();
   });
 
-  // Fallback toujours dispo après 5s
   setTimeout(() => {
     if (!detected) showFallback();
   }, 5000);
