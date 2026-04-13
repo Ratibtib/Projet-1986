@@ -1113,8 +1113,8 @@ const ENIGMAS = [
     id: 15, type: "Devinette", format: "text",
     narrative: "MODULE LOGIQUE > Niveau 2 > Capacité de déduction sous pression.",
     iframe: "https://scape.enepe.fr/ressources/cesar/index2.html",
-    question: "🥑 - AVOCAT - 🥑\n\nex kfymkd ocd ex pbesd ybsqsxksbo ne wohsaeo.",
-    answer: ["un avocat est un fruit originaire du mexique"],
+    question: "🥑 - AVOCAT - 🥑\n\nV'SWZYBDKXD M'OCD ZKC VK MREDO M'OCD V'KDDBBSCCKQO",
+    answer: ["L'IMPORTANT C'EST PAS LA CHUTE, C'EST L'ATTERRISSAGE"],
     hint: "A vo cat",
     title: "Avocat"
   },
@@ -1554,7 +1554,7 @@ function openEnigma(idx) {
   const e = ENIGMAS[idx];
   const isSolved = STATE.solved.includes(idx);
 
-  if (idx === 11 && e.format === 'fakebug' && !isSolved) {
+  if (e.format === 'fakebug' && !isSolved) {
     triggerFakeBug(idx); return;
   }
 
