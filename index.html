@@ -887,7 +887,7 @@ html, body {
         <span style="font-size:1.3rem;">📷</span>
         <div>
           <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--accent);letter-spacing:1px;margin-bottom:4px;">CAMÉRA & FLASH</div>
-          <div style="font-size:.8rem;font-weight:300;color:var(--text);line-height:1.5;">L'accès à la caméra et au flash sera sollicité pour des modules de détection optique.</div>
+          <div style="font-size:.8rem;font-weight:300;color:var(--text);line-height:1.5;">L'accès à la caméra sera sollicité pour des modules de détection optique.</div>
         </div>
       </div>
       
@@ -1038,8 +1038,8 @@ const ENIGMAS = [
   // ── ACTE 1 : INITIALISATION (0-7) ──
   {
     id: 1, type: "Culture", format: "text",
-    narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
-    question: "Même s'il n'est pas menuisier, il a quand même ciré beaucoup de parquets.\n\nMalgré ses nombreux talents les briques n'ont jamais fait partie des habitudes.\n\nIl a été au sommet, mais tout le monde le souhaite à ses pieds.\n\nQui est-ce ?",
+    narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt >",
+    question: "Même s'il n'est pas menuisier,\n il a quand même ciré beaucoup de parquets.\n\nMalgré ses nombreux talents,\n les briques n'ont jamais fait partie de ses habitudes.\n\nIl a été au sommet,\n mais tout le monde le souhaite à ses pieds.\n\nQui est-ce ?",
     answer: ["jordan", "michael jordan"],
     hint: "Sa Majesté de l'Air...",
     title: "Bricolage"
@@ -1048,14 +1048,14 @@ const ENIGMAS = [
   {
     id: 2, type: "Suite Logique", format: "text",
     narrative: "MODULE LOGIQUE > Séquence numérique incomplète détectée. Analyse requise.",
-    question: "Complétez la suite :\n\n21  —  22  —  26  —  ?\n\nEntrez le nombre manquant.",
+    question: "21  —  22  —  26  —  ?\n\nComplétez la suite.",
     answer: ["5", "05"],
     hint: "??/??/????",
     title: "La Suite Mystère"
   },
   
   {
-    id: 3, type: "Culture Ciné 80s", format: "text",
+    id: 3, type: "Culture", format: "text",
     narrative: "MODULE CULTUREL > Scan des références générationnelles > Décennie 1986.",
     question: "1986, tu pointais le bout de ton nez.\n\nLa même année il décide de prendre un peu de congés.\n\nVoiture de sport, casquette.\n\nEn une seule journée il vous a marqué pendant des années.\n\nQui est-ce ?",
     answer: ["ferris bueller", "ferris", "bueller"],
@@ -1065,7 +1065,7 @@ const ENIGMAS = [
 
   {
     id: 4, type: "Culture", format: "text",
-    narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
+    narrative: "SCAN BIOMÉTRIQUE > Vérification des capacités élémentaires",
     question: "Grâce à moi, elle est belle !\n\nQui suis-je ?",
     answer: ["b"],
     hint: "Grâce à moi, on est bon",
@@ -1075,9 +1075,9 @@ const ENIGMAS = [
 {
     id: 5, type: "Interaction", format: "lightdetect",
     narrative: "ALERTE > Module optique compromis.",
-    question: "Le système est plongé dans l'obscurité. Réactivez le module.",
+    question: "Et la lumière fût...",
     answer: ["ok"],
-    hint: "Utilisez le bouton de secours.",
+    hint: "Passez de l'obsurité à la lumière",
     title: "Et la lumière fut"
   },
 
@@ -1092,8 +1092,8 @@ const ENIGMAS = [
 
   {
     id: 7, type: "Histoire", format: "text",
-    narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
-    question: "Je pousse chez beaucoup\n\nMais je peux me faire attendre\n\nJe suis moins fournie que ton espoir de m'avoir\n\nQui suis-je ?",
+    narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt.",
+    question: "Je peux me faire attendre.\n\nMais en général je finis par pousser.\n\nJe suis moins fournie que ton espoir de m'avoir.\n\nQui suis-je ?",
     answer: ["barbe"],
     hint: "",
     title: "Hope"
@@ -1106,30 +1106,31 @@ const ENIGMAS = [
     hasSpeedControl: true,
     hasDownload: true,
     narrative: "INTERCEPTION > Message audio capté. Le Père Fouras a parlé. Décodage nécessaire.",
-    question: "Un message audio a été intercepté.\n\nÉcoutez attentivement et trouvez la réponse à l'énigme du Père Fouras.",
+    question: "Trouvez la réponse à l'énigme.",
     answer: ["pas", "un pas"],
     hint: "de géant",
     title: "Transmission Brouillée"
   },
 
   {
-    id: 9, type: "Pieds", format: "text",
-    narrative: "MODULE logique > Un code a été dissimulé sur un document physique. Sauras-tu le révéler.",
+    id: 9, type: "Ieps", format: "text",
+    narrative: "MODULE logique > Vérification des capacités d'analyse.",
     image: "icons/pieds.png",
     question: "Combien de pieds voyez-vous ?",
     answer: ["12"],
     hint: "La tête en bas",
-    title: "Les pieds"
+    title: "Ieps"
   },
   
    {
-    id: 10, type: "Suite logique gourmande", format: "text",
+    id: 10, type: "Suite gourmande", format: "text",
     narrative: "MODULE LOGIQUE > Séquence numérique incomplète détectée. Analyse requise.",
     question: "Trouvez le résultat :\n\n🍟  -  8  -  9  -  1\n1  -  9  -🍔-  1\n0  -  2  -  0  -  2\n2  -  0  -  1  -  🍪\n🍕-  2  -  0  -  2\n\n🍔  x  🍕  +  🍪 - 2 x 🍟 = ?",
     answer: ["40"],
     hint: "Vois-tu les années ?",
     title: "La Faim"
   },
+
 
    {
     id: 11, type: "Devinette", format: "text",
@@ -1143,24 +1144,26 @@ const ENIGMAS = [
   {
     id: 12, type: "Devinette", format: "text",
     narrative: "MODULE ANALYTIQUE > Épreuve de raisonnement. Concentration maximale requise.",
-    question: "Tu es dans un bus qui part avec 6 passagers.\n\nÀ l'arrêt suivant, 3 montent et 2 descendent.\nAu suivant, 5 descendent et 4 montent.\n\nDe quelle couleur sont les yeux du chauffeur ?",
+    question: "Tu es dans un bus qui part avec 6 passagers dont 4 ont les yeux bleus et 2 ont les yeux verts\n\nÀ l'arrêt suivant, 2 montent et 3 descendent.\nAu suivant, 5 descendent et 4 montent.\n\nDe quelle couleur sont les yeux du chauffeur ?",
     answer: ["noir", "marron", "noirs", "marrons", "brun", "bruns"],
     hint: "Relisez la première phrase... QUI conduit le bus ? 👀",
     title: "Le Piège du Bus"
   },
 
+
+
    {
-    id: 13, type: "Culture Antilles", format: "text",
-    narrative: "MODULE CULTUREL > Scan régional > Identité caribéenne.",
+    id: 13, type: "Culture", format: "text",
+    narrative: "MODULE CULTUREL > Scan local > Identité.",
     question: "Fabriqué à partir de canne à sucre,\nje suis l'âme des Antilles.\nAgricole ou industriel,\nvieux ou blanc, je suis incontournable.\n\nQui suis-je ?",
     answer: ["rhum", "le rhum", "rum"],
-    hint: "C'est une boisson spiritueuse emblématique de la Guadeloupe 🥃",
-    title: "L'Or des Antilles"
+    hint: "Tchin tchin",
+    title: "L'Or"
   },
 
   {
     id: 14, type: "0101", format: "text",
-    narrative: "MODULE si > Un code a été dissimulé sur sauras-tu le révéler.",
+    narrative: "MODULE PROGRAMMATION > Un code a été dissimulé sauras-tu le révéler.",
     question: "01001110 10111000 10101001 10010101 11101011 00011010 10111010 ",
     answer: ["triple saut"],
     hint: "3 fois tu voleras",
@@ -1191,7 +1194,7 @@ const ENIGMAS = [
 
   {
     id: 17, type: "Culture", format: "text",
-    narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
+    narrative: "MODULE CULTURE > Vérification des centres d'intérêt.",
     question: "Je suis né muet mais après 40 ans,\n\nj'ai enfin fini par parler.\n\nQui suis-je ?",
     answer: ["cinéma"],
     hint: "Des frères à Hollywood",
@@ -1200,8 +1203,8 @@ const ENIGMAS = [
 
   {
     id: 18, type: "Culture", format: "text",
-    narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
-    question: "Je suis entre 188 et 190, mais je ne suis pas 189.\n\nQui suis-je ?",
+    narrative: "SCAN BIOMÉTRIQUE > Vérification des capacités d'analyse.",
+    question: "Je suis entre 188 et 190,\n\n mais je ne suis pas 189.\n\nQui suis-je ?",
     answer: ["et"],
     hint: "Littéralement entre",
     title: "188-190"
@@ -1217,8 +1220,8 @@ const ENIGMAS = [
 
   {
     id: 20, type: "Histoire", format: "text",
-    narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt > Module ? activé.",
-    question: "Je nettoie quand il pleut,\n\nMais ce jour-là, j'étais au mauvais endroit.\n\nOn m'a monté puis démonté... pour rien\n\nQui suis-je ?",
+    narrative: "SCAN BIOMÉTRIQUE > Vérification des centres d'intérêt",
+    question: "On fait appel à moi les jours de pluie,\n\nMais ce jour-là, j'étais au mauvais endroit.\n\nJe suis parfois monté, puis démonté...\n\nQui suis-je ?",
     answer: ["essuie glaces,essuie-glaces"],
     hint: "",
     title: "Humide"
@@ -1231,7 +1234,7 @@ const ENIGMAS = [
     rebusItems: ["🐏", "➕", "♨️"],
     rebusHint: "Animal + Sensation",
     answer: ["ramothe", "ram hot", "ramotte"],
-    hint: "La première image = un bélier (ram). La deuxième = chaud ?",
+    hint: "C'est mort ! A toi de jouer !",
     title: "Symboles Cachés"
   },
 
@@ -1269,7 +1272,7 @@ const ENIGMAS = [
 
   {
     id: 25, type: "Géoguessing", format: "text",
-    narrative: "MODULE GEOGRAPHIQUE",
+    narrative: "MODULE GEOGRAPHIQUE > Capacité de repérage en mission.",
     image: "icons/lisbonne.png",
     iframe : "https://lockee.fr/o/EmWCssUf?nobg?noft",
     answer: ["woosah"],
@@ -1285,14 +1288,14 @@ const ENIGMAS = [
     question: "<!> Alerte sécurité <!> \n\n Scanne de vérification obligatoire",
     nfcTagId: "04:EE:01:0A:30:1F:94",  // remplace par le serial number de ta puce
     answer: ["ok"],
-    hint: "Maintenez votre doigt sur la zone de scan pendant 3 secondes.",
+    hint: "Utiliser votre mobile scanner pour detecter le signal",
     title: "Signal Fantôme"
   },
 
   {
     id: 27, type: "Devinette", format: "text",
-    narrative: "MODULE PHILOSOPHIQUE > Pensée abstraite requise.",
-    question: "Je suis toujours devant toi,\nMais tu ne peux jamais me rattraper.\nPlus tu avances, plus j'avance aussi.\n\nQui suis-je ?",
+    narrative: "MODULE CULTURE > Pensée abstraite requise.",
+    question: "Je suis toujours devant toi,\n\nMais tu ne peux jamais me rattraper.\n\nPlus tu avances, plus j'avance aussi.\n\nQui suis-je ?",
     answer: ["futur", "le futur", "l'avenir", "avenir", "demain"],
     hint: "Nombreux veulent y voir, d'autres veulent en revenir",
     title: "L'Insaisissable"
@@ -1303,24 +1306,24 @@ const ENIGMAS = [
     id: 28, type: "Cadena", format: "text",
     narrative: "MODULE ACTION > Niveau 2 > Capacité de manipulation prolongée.",
     question: "Le cerveau humain est comme un parachute :\n\nIl fonctionne mieux quand il est ouvert\n\nEdward De Bono.",
-    answer: ["???"],
+    answer: ["Bonobo"],
     hint: "Le cerveau est donc la clé",
     title: "Brain"
   },
   
   {
     id: 29, type: "Souvenir", format: "text",
-    narrative: "MODULE mémoire > Niveau 3 > Capacité de mémorisation avancée.",
+    narrative: "MODULE MEMOIRE > Niveau 3 > Capacité de mémorisation avancée.",
     image: "icons/jetpack.gif",
-    question: "",
-    answer: ["L1 L2 R1 R2 Haut Bas Gauche Droite L1 L2 R1 R2 Haut Bas Gauche Droite"],
-    hint: "cheat",
+    question: "Agent si vous voulez poursuivre la mission, separez les éléments de votre réponse par ''-''",
+    answer: ["L1-L2-R1-R2-Haut-Bas-Gauche-Droite-L1-L2-R1-R2-Haut-Bas-Gauche-Droite"],
+    hint: "cheat code",
     title: "Carl Johnson"
   },
   
   {
     id: 30, type: "Cadena", format: "text",
-    narrative: "MODULE logique > Un code a été dissimulé sur un document physique. Sauras-tu le révéler.",
+    narrative: "MODULE LOGIQUE > Un code a été dissimulé, sauras-tu le révéler.",
     image2: "icons/cadenacryptex.png",
     iframe2: "https://lockee.fr/o/iR33Tu2z?nobg?noft",    
     question: "",
@@ -1352,15 +1355,15 @@ const ENIGMAS = [
  {
   id: 32, type: "Vision Secrète", format: "text",
     narrative: "MODULE SOUVENIR > Une bobine temporelle a été dissimulée.",
-    question: "Trouvez le mot secret.",
+    question: "Trouvez la bobine pour trouver le lieu secret.",
     answer: ["le loft"],
-    hint: "Regardez bien à travers les filtres...",
+    hint: "OK bobine temporelle, c'est peut être un grand mot... on va dire étiquette",
     title: "Bobine"
   },
   
   {
     id: 33, type: "Géoguessing", format: "text",
-    narrative: "MODULE GEOGRAPHIQUE",
+    narrative: "MODULE GEOGRAPHIQUE > Capacité de repérage en mission.",
     iframe : "https://lockee.fr/o/YeowD45g?nobg?noft",
     question: "Je suis né entre deux mondes instables,\nNi tout à fait terre, ni tout à fait mer.\NOn me croit immobile, mais je change sans cesse,\nCar ceux qui m’entourent avancent et reculent sans fin.\nJ’ai défié le temps, les assauts et les hommes,\nGrimpant vers le ciel comme une prière de pierre.\nRois, pèlerins et curieux m’ont convoité,\nMais seuls les patients savent quand je me révèle.\nQui suis-je ?",
     answer: ["un type fier, un type fort, yul brenner, junior bevil"],
@@ -1390,7 +1393,7 @@ const ENIGMAS = [
 
   {
     id: 36, type: "Géoguessing", format: "text",
-    narrative: "MODULE GEOGRAPHIQUE",
+    narrative: "MODULE GEOGRAPHIQUE > Capacité de repérage en mission.",
     image: "icons/nimes.png",
     iframe : "https://lockee.fr/o/gqcbvbxg?nobg?noft",
     answer: ["fais dodo"],
@@ -1428,7 +1431,7 @@ const ENIGMAS = [
     iframe: "https://lockee.fr/o/NEfc604n?nobg&noft",
     question: "A toi de jouer l'artiste !",
     answer: ["stephen"],
-    hint: "A vo cat",
+    hint: "C'est mort ! A toi de trouver !",
     title: "Lalala"
   },
   
