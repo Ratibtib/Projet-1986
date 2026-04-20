@@ -2264,7 +2264,7 @@ function bearingTo(lat1, lon1, lat2, lon2) {
 
 function distToZoom(dist) {
   const MAX_DIST = 10000;
-  const MIN_ZOOM = 17;
+  const MIN_ZOOM = 19;
   const MAX_ZOOM = 22;
   const clamped = Math.max(50, Math.min(dist, MAX_DIST));
   const t = 1 - Math.log(clamped / 50) / Math.log(MAX_DIST / 50);
