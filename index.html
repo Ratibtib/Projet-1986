@@ -2372,7 +2372,7 @@ function renderGPS(container, idx) {
     });
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
+      maxZoom: 20,
     }).addTo(gpsMap);
 
     gpsTargetZone = L.circle([TARGET.lat, TARGET.lng], {
